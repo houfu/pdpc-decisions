@@ -1,7 +1,7 @@
 # TODO
 
-###CreateCorpus
-~~* ~~Rename filenames to something more sensible~~~~
+### CreateCorpus
+* ~~Rename filenames to something more sensible~~
 * ~~Be able to update corpus without rebuilding the others~~
 * (feat) Remove page numbers, page headers from corpus (Currently being done manually)
 * (feat) Fix paragraphs that run over a page (Currently being done manually)
@@ -16,5 +16,5 @@
 * ~~(bug) Computer thinks Pte. is the end of the sentence. Cannot use Regex to process if they are on separate sentences~~
 * ~~(bug) Depending on how the footnote is placed, may be at the end of the sentence (usually ok) or beginning of the sentence (not ok)~~
 
-###Indexer
-- [] Create a list where case information and summary is available
+### Indexer
+- Create a list where case information and summary is available
