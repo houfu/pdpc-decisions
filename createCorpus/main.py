@@ -9,6 +9,7 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 
 from constants import SOURCE_FILE_PATH, PLAIN_CORPUS_FILE_PATH
+from createCorpus.cleanUpSource import clean_up_source
 from createCorpus.findCitation import find_citation
 
 
@@ -39,28 +40,30 @@ fileList = []
 for entry in os.scandir(SOURCE_FILE_PATH):
     if entry.name[-3:] == 'pdf':
         print(entry.path)
-        fileList.append(get_text_pdf(entry.path))
+        raw_text = get_text_pdf(entry.path)
+        clean_text = clean_up_source(raw_text)
+        fileList.append((raw_text, clean_text, entry.path))
 
 write_count = 0
 
 for idx, f in enumerate(fileList):
-    citation = find_citation(f)
+    citation = find_citation(f[0])
     if citation:
         citation_file = citation.replace(' ', '_')
         file_path = PLAIN_CORPUS_FILE_PATH + citation_file + '.txt'
         if os.path.isfile(file_path):
             if proceed:
                 with open(file_path, 'w') as fOut:
-                    fOut.write(f)
+                    fOut.write(f[1])
                     print('Wrote: ', citation_file + '.txt')
                     write_count += 1
         else:
             with open(file_path, 'w') as fOut:
-                fOut.write(f)
+                fOut.write(f[1])
                 print('Wrote: ', citation_file + '.txt')
                 write_count += 1
     else:
-        print('Citation not found: ', f[:60])
+        print('Citation not found: ', f[2])
 
 print('Wrote %d files' % write_count)
 print('Success!')
