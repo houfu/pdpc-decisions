@@ -1,15 +1,30 @@
 #  MIT License Copyright (c) 2019. Houfu Ang.
 
+import io
 import os
 
-from xpdf_python import to_text
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfpage import PDFPage
 
 from constants import SOURCE_FILE_PATH, PLAIN_CORPUS_FILE_PATH
 from createCorpus.findCitation import find_citation
 
 
 def get_text_pdf(filename):
-    return to_text(filename, False)[0]
+    output = io.StringIO()
+    manager = PDFResourceManager()
+    converter = TextConverter(manager, output, laparams=LAParams())
+    interpreter = PDFPageInterpreter(manager, converter)
+    infile = open(filename, 'rb')
+    for page in PDFPage.get_pages(infile):
+        interpreter.process_page(page)
+    infile.close()
+    converter.close()
+    text = output.getvalue()
+    output.close()
+    return text
 
 
 """
@@ -23,6 +38,7 @@ proceed = input('Do you wish to overwrite existing files in the corpus?')
 fileList = []
 for entry in os.scandir(SOURCE_FILE_PATH):
     if entry.name[-3:] == 'pdf':
+        print(entry.path)
         fileList.append(get_text_pdf(entry.path))
 
 write_count = 0
