@@ -13,6 +13,21 @@ from createCorpus.cleanUpSource import clean_up_source
 from createCorpus.findCitation import find_citation
 
 
+def get_first_text_pdf(filename):
+    output = io.StringIO()
+    manager = PDFResourceManager()
+    converter = TextConverter(manager, output, laparams=LAParams())
+    interpreter = PDFPageInterpreter(manager, converter)
+    infile = open(filename, 'rb')
+    for page in PDFPage.get_pages(infile, maxpages=1):
+        interpreter.process_page(page)
+    infile.close()
+    converter.close()
+    text = output.getvalue()
+    output.close()
+    return text
+
+
 def get_text_pdf(filename):
     output = io.StringIO()
     manager = PDFResourceManager()
@@ -40,26 +55,28 @@ fileList = []
 for entry in os.scandir(SOURCE_FILE_PATH):
     if entry.name[-3:] == 'pdf':
         print(entry.path)
-        raw_text = get_text_pdf(entry.path)
-        clean_text = clean_up_source(raw_text)
-        fileList.append((raw_text, clean_text, entry.path))
+        first_page = get_first_text_pdf(entry.path)
+        citation = find_citation(first_page)
+        fileList.append((citation, entry.path))
 
 write_count = 0
 
 for idx, f in enumerate(fileList):
-    citation = find_citation(f[0])
+    citation = f[0]
     if citation:
         citation_file = citation.replace(' ', '_')
         file_path = PLAIN_CORPUS_FILE_PATH + citation_file + '.txt'
         if os.path.isfile(file_path):
             if proceed:
+                print('Now processing: {0}'.format(f[0]))
                 with open(file_path, 'w') as fOut:
-                    fOut.write(f[1])
+                    fOut.write(clean_up_source(get_text_pdf(f[1])))
                     print('Wrote: ', citation_file + '.txt')
                     write_count += 1
         else:
+            print('Now processing: {0}'.format(f[0]))
             with open(file_path, 'w') as fOut:
-                fOut.write(f[1])
+                fOut.write(clean_up_source(get_text_pdf(f[1])))
                 print('Wrote: ', citation_file + '.txt')
                 write_count += 1
     else:
