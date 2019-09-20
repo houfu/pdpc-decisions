@@ -2,6 +2,7 @@
 
 import io
 import os
+import time
 
 from pdfminer.converter import TextConverter
 from pdfminer.layout import LAParams
@@ -51,6 +52,7 @@ Execute this code to prepare a distribution for the corpus.
 """
 
 proceed = input('Do you wish to overwrite existing files in the corpus?')
+start_time = time.time()
 fileList = []
 for entry in os.scandir(SOURCE_FILE_PATH):
     if entry.name[-3:] == 'pdf':
@@ -83,4 +85,5 @@ for idx, f in enumerate(fileList):
         print('Citation not found: ', f[2])
 
 print('Wrote %d files' % write_count)
+print('Time taken to complete: {0}s'.format(time.time() - start_time))
 print('Success!')
