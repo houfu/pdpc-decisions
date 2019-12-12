@@ -2,8 +2,7 @@
 
 import os
 
-import pymongo
-from pymongo import ReplaceOne, InsertOne
+from pymongo import ReplaceOne, InsertOne, MongoClient
 
 from constants import PLAIN_CORPUS_FILE_PATH
 
@@ -22,7 +21,7 @@ user = input('What is the name of the database user?')
 password = input('What is {0}\'s password?'.format(user))
 connection_string = "mongodb+srv://{user}:{pw}@zeeker-a1-otlvr.gcp.mongodb.net/test?retryWrites=true&w=majority" \
     .format(user=user, pw=password)
-db_client = pymongo.MongoClient(connection_string)
+db_client = MongoClient(connection_string)
 collection = db_client['pdpc-sg-decisions']['Singapore Data Protection Cases']
 
 plain_source = input(
