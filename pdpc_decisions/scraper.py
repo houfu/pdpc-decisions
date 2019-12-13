@@ -82,7 +82,7 @@ def get_url(item: WebElement):
 
 
 def get_summary(item: WebElement):
-    return item.find_element_by_class_name('rte').text
+    return item.find_element_by_class_name('rte').text.replace('\n', '. ')
 
 
 if __name__ == '__main__':
