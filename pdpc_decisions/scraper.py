@@ -56,7 +56,6 @@ def scrape():
 
 class PDPCDecisionItem:
     def __init__(self, decision: WebElement):
-        self.decision = decision
         self.date = get_date(decision)
         self.respondent = get_respondent(decision)
         self.summary = get_summary(decision)
