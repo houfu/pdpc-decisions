@@ -7,6 +7,7 @@ import click
 from pdpc_decisions.download_file import download_files, create_corpus
 from pdpc_decisions.save_file import save_scrape_results_to_csv
 from pdpc_decisions.scraper import scrape
+from pdpc_decisions.zeeker import zeeker_db_build
 
 
 @click.command()
@@ -44,6 +45,8 @@ def pdpc_decision(csv, download, corpus, action):
         download_files(options, scrape_results)
     if action == 'corpus':
         create_corpus(options, scrape_results)
+    if action == 'zeeker':
+        zeeker_db_build(options, scrape_results)
     diff = time.time() - start_time
     print('Finished. This took {}s.'.format(diff))
 

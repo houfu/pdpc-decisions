@@ -58,6 +58,7 @@ class PDPCDecisionItem:
     def __init__(self, decision: WebElement):
         self.date = get_date(decision)
         self.respondent = get_respondent(decision)
+        self.title = get_title(decision)
         self.summary = get_summary(decision)
         self.download_url = get_url(decision)
 
@@ -82,6 +83,10 @@ def get_url(item: WebElement):
 
 def get_summary(item: WebElement):
     return item.find_element_by_class_name('rte').text.replace('\n', '. ')
+
+
+def get_title(item: WebElement):
+    return item.find_element_by_tag_name('a').text
 
 
 if __name__ == '__main__':
