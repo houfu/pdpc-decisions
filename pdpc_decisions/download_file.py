@@ -27,7 +27,7 @@ def download_files(options, items):
             print("Downloaded a pdf: ", destination)
         else:
             destination = "{}{} {}.txt".format(options["download_folder"], item.date.strftime('%Y-%m-%d'), item.respondent)
-            with open(destination, "w") as f:
+            with open(destination, "w", encoding='utf-8') as f:
                 from bs4 import BeautifulSoup
                 from urllib.request import urlopen
                 soup = BeautifulSoup(urlopen(url), 'html5lib')
@@ -114,7 +114,7 @@ def create_corpus(options, items):
         print('Now processing: {}'.format(entry.name))
         file_name = options["corpus_folder"] + entry.name[:-4] + '.txt'
         if entry.name[-3:] == 'pdf':
-            with open(file_name, 'w') as fOut:
+            with open(file_name, 'w', encoding='utf-8') as fOut:
                 fOut.write(clean_up_source(get_text_from_pdf(entry.path)))
                 print("Wrote: {}".format(file_name))
         if entry.name[-3:] == 'txt':

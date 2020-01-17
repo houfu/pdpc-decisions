@@ -5,7 +5,7 @@ import csv
 
 def save_scrape_results_to_csv(options, scrape_results):
     print('Saving scrape results as a csv file.')
-    with open(options["csv_path"], 'w', newline='') as f:
+    with open(options["csv_path"], 'w', newline='', encoding='utf-8') as f:
         csvwriter = csv.writer(f)
         csvwriter.writerow(['date', 'respondent', 'summary', 'download_url'])
         for result in scrape_results:

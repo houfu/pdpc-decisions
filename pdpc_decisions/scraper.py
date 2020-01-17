@@ -54,16 +54,13 @@ def scrape():
     return result
 
 
-class PDPCDecisionItem:
-    def __init__(self, decision: WebElement):
-        self.date = get_date(decision)
-        self.respondent = get_respondent(decision)
-        self.title = get_title(decision)
-        self.summary = get_summary(decision)
-        self.download_url = get_url(decision)
+def get_url(item: WebElement):
+    link = item.find_element_by_tag_name('a')
+    return link.get_property('href')
 
-    def __str__(self):
-        return "PDPCDecision object: {} {}".format(self.date, self.respondent)
+
+def get_summary(item: WebElement):
+    return item.find_element_by_class_name('rte').text.replace('\n', '. ')
 
 
 def get_date(item: WebElement):
@@ -76,17 +73,20 @@ def get_respondent(item: WebElement):
     return re.split(r"\s+[bB]y|[Aa]gainst\s+", text, re.I)[1].strip()
 
 
-def get_url(item: WebElement):
-    link = item.find_element_by_tag_name('a')
-    return link.get_property('href')
-
-
-def get_summary(item: WebElement):
-    return item.find_element_by_class_name('rte').text.replace('\n', '. ')
-
-
 def get_title(item: WebElement):
     return item.find_element_by_tag_name('a').text
+
+
+class PDPCDecisionItem:
+    def __init__(self, decision: WebElement):
+        self.date = get_date(decision)
+        self.respondent = get_respondent(decision)
+        self.title = get_title(decision)
+        self.summary = get_summary(decision)
+        self.download_url = get_url(decision)
+
+    def __str__(self):
+        return "PDPCDecision object: {} {}".format(self.date, self.respondent)
 
 
 if __name__ == '__main__':

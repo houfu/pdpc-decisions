@@ -7,7 +7,7 @@ import click
 from pdpc_decisions.download_file import download_files, create_corpus
 from pdpc_decisions.save_file import save_scrape_results_to_csv
 from pdpc_decisions.scraper import scrape
-from pdpc_decisions.zeeker import zeeker_db_build
+from pdpc_decisions.zeeker import zeeker_main
 
 
 @click.command()
@@ -17,8 +17,9 @@ from pdpc_decisions.zeeker import zeeker_db_build
               default='download/', type=click.Path(file_okay=False), show_default=True)
 @click.option('--corpus', help='Destination folder for PDPC decisions converted to text files', default='corpus/',
               type=click.Path(file_okay=False), show_default=True)
+@click.option('--action','sub_action', help="Option that will be passed to an action")
 @click.argument('action')
-def pdpc_decision(csv, download, corpus, action):
+def pdpc_decision(csv, download, corpus, action, sub_action):
     """
     Scripts to scrape all decisions of the Personal Data Protection Commission of Singapore.
 
@@ -31,9 +32,12 @@ def pdpc_decision(csv, download, corpus, action):
     "csv"      Save the items gathered by the scraper as a csv file.
 
     "files"     Downloads all the decisions from the PDPC website into a folder.
+
+    "zeeker"    Construct or updates the zeeker database
     """
     start_time = time.time()
-    options = {"csv_path": csv, "download_folder": download, "corpus_folder": corpus}
+    options = {"csv_path": csv, "download_folder": download, "corpus_folder": corpus, "action": action,
+               "sub-action": sub_action}
     scrape_results = scrape()
     if action == 'all':
         save_scrape_results_to_csv(options, scrape_results)
@@ -46,7 +50,7 @@ def pdpc_decision(csv, download, corpus, action):
     if action == 'corpus':
         create_corpus(options, scrape_results)
     if action == 'zeeker':
-        zeeker_db_build(options, scrape_results)
+        zeeker_main(options, scrape_results)
     diff = time.time() - start_time
     print('Finished. This took {}s.'.format(diff))
 
