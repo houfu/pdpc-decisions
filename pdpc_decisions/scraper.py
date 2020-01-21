@@ -1,4 +1,4 @@
-#  MIT License Copyright (c) 2019. Houfu Ang
+#  MIT License Copyright (c) 2020. Houfu Ang
 
 """
 Looks over the PDPC website and creates PDPC Decision objects
@@ -28,6 +28,7 @@ def scrape():
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
+    options.add_argument('--no-sandbox')
 
     driver = Chrome(options=options)
     driver.implicitly_wait(5)

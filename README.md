@@ -16,16 +16,52 @@ and compile a table of decisions with information from the summaries provided by
 If the decision is not a PDF, collects the information provided on the decision web page and saves it as a text file.
 * Convert the PDF files into text files
 
-## Requirements
+## What pdpc-decisions uses
 * Python 3
 * PDF Miner
 * Selenium
+* Chrome
+
+## Installation
+
+### Local install
+* Clone this repository.
+
+```shell script
+git clone https://github.com/houfu/pdpc-decisions.git
+```
+
+* Install using `setup.py` (which will also install all dependencies. Except Chrome and ChromeDriver)
+```shell script
+# cd pdpc-decisions
+# pip install .
+```
+
+* If necessary, install [Chrome](https://www.google.com/chrome/) 
+and [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/) for Selenium to work.
+
+The main entry point for the script is `pdpcdecision.py`
+
+### Docker Image
+
+I also dockerised the application for my personal ease of use. 
+Basically pull the image from [docker hub](https://hub.docker.com/r/houfu/pdpc-decisions).
+```shell script
+docker pull houfu/pdpc-decisions
+```
+
+After that you can run the image and pass commands and arguments to it.
+For example, if you would like the application to do all actions.
+
+```shell script
+docker run houfu/pdpc-decisions all
+```
+
+This might not be very clever because downloads will be stored in the docker image 
+and not easily accessed. You could attach a volume but I have not tried it. 
+You should set the option to your volume.
 
 ## Usage
-
-I have not got round to finalising an install to the command line.
-
-Your best bet is to run the python scripts using the entry point `pdpcdecision.py`
 
 The script accepts the following actions and options:
 
