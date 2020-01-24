@@ -51,7 +51,7 @@ to save the files there. For example:
 ```shell script
 docker run \ 
   --mount type=bind,source="$(pwd)"/target,target=/code/download \ # Target directory must exist!
-  houfu/pdpc-decisions:1.01e \
+  houfu/pdpc-decisions \
   all \
   --root /code/download/
 ```
