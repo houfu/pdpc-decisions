@@ -1,5 +1,6 @@
 #  MIT License Copyright (c) 2019. Houfu Ang
 
+import os
 import time
 
 import click
@@ -17,9 +18,11 @@ from pdpc_decisions.zeeker import zeeker_main
               default='download/', type=click.Path(file_okay=False), show_default=True)
 @click.option('--corpus', help='Destination folder for PDPC decisions converted to text files', default='corpus/',
               type=click.Path(file_okay=False), show_default=True)
-@click.option('--action','sub_action', help="Option that will be passed to an action")
+@click.option('--root', '-r', help='Root directory for downloads and files', type=click.Path(file_okay=False),
+              default=os.getcwd(), show_default=True)
+@click.option('--action', 'sub_action', help="Option that will be passed to an action")
 @click.argument('action')
-def pdpc_decision(csv, download, corpus, action, sub_action):
+def pdpc_decision(csv, download, corpus, action, sub_action, root):
     """
     Scripts to scrape all decisions of the Personal Data Protection Commission of Singapore.
 
@@ -37,7 +40,9 @@ def pdpc_decision(csv, download, corpus, action, sub_action):
     """
     start_time = time.time()
     options = {"csv_path": csv, "download_folder": download, "corpus_folder": corpus, "action": action,
-               "sub-action": sub_action}
+               "sub-action": sub_action, "root": root}
+    if options['root']:
+        os.chdir(root)
     scrape_results = scrape()
     if action == 'all':
         save_scrape_results_to_csv(options, scrape_results)

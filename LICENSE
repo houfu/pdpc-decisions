@@ -1,22 +1,24 @@
-PDPC Decisions Corpus is a corpus of all decisions released by the Personal
-Data Protection Commission of Singapore at <https://www.pdpc.gov.sg/
-Commissions-Decisions/Data-Protection-Enforcement-Cases>.
+pdpc-decisions provides scripts to create a corpus of all decisions
+released by the Personal Data Protection Commission of Singapore
+at <https://www.pdpc.gov.sg/Commissions-Decisions/
+Data-Protection-Enforcement-Cases>.
 
 The source material (the decisions) is protected by copyright. Further
-details of the terms and conditions of use fir the source material may
+details of the terms and conditions of use for the source material may
 be found at <https://www.pdpc.gov.sg/Terms-and-Conditions-of-Use>
-
-Accordingly, use of the source material in this corpus is solely
+According to the terms, use of the source material in this corpus is solely
 for personal, internal, non-commercial and informational purposes only.
 Commercial use is expressly prohibited without the consent of the Personal
 Data Protection Commission.
+
+You are solely responsible for your own use of the source material.
 
 All other materials provided herein are licensed under the MIT License
 as reproduced below.
 
 MIT License
 
-Copyright (c) 2019 Houfu Ang
+Copyright (c) 2020 Houfu Ang
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

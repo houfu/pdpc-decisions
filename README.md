@@ -24,6 +24,38 @@ If the decision is not a PDF, collects the information provided on the decision 
 
 ## Installation
 
+### Docker Image
+
+I dockerised the application for my personal ease of use.
+It is probably the easiest and most straight-forward way 
+to use the application and I recommend it too.
+
+You need to have docker installed. 
+Pull the image from [docker hub](https://hub.docker.com/r/houfu/pdpc-decisions).
+```shell script
+docker pull houfu/pdpc-decisions
+```
+
+After that you can run the image and pass commands and arguments to it.
+For example, if you would like the application to do all actions.
+
+```shell script
+docker run houfu/pdpc-decisions all
+```
+
+This isn't clever because downloads will be stored in the docker image 
+and not easily accessed. Bind a volume in your filesystem and 
+use the `--root` option to direct the application
+to save the files there. For example:
+
+```shell script
+docker run \ 
+  --mount type=bind,source="$(pwd)"/target,target=/code/download \ # Target directory must exist!
+  houfu/pdpc-decisions:1.01e \
+  all \
+  --root /code/download/
+```
+
 ### Local install
 * Clone this repository.
 
@@ -42,24 +74,6 @@ and [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/) for Se
 
 The main entry point for the script is `pdpcdecision.py`
 
-### Docker Image
-
-I also dockerised the application for my personal ease of use. 
-Basically pull the image from [docker hub](https://hub.docker.com/r/houfu/pdpc-decisions).
-```shell script
-docker pull houfu/pdpc-decisions
-```
-
-After that you can run the image and pass commands and arguments to it.
-For example, if you would like the application to do all actions.
-
-```shell script
-docker run houfu/pdpc-decisions all
-```
-
-This might not be very clever because downloads will be stored in the docker image 
-and not easily accessed. You could attach a volume but I have not tried it. 
-You should set the option to your volume.
 
 ## Usage
 
@@ -78,6 +92,8 @@ Accepts the following actions.
   "`files`"     Downloads all the decisions from the PDPC website into a
   folder.
 
+  "`zeeker`"    Construct or updates the zeeker database (internal use only)
+
 Options:
   
   `--csv FILE`            Filename for saving the items gathered by scraper as a
@@ -88,6 +104,10 @@ Options:
   
   `--corpus DIRECTORY`    Destination folder for PDPC decisions converted to
                         text files  [default: corpus/]
+  `-r, --root DIRECTORY`  Root directory for downloads and files  [default:
+                        Your current working directory]
+  
+  `--action TEXT`         Option that will be passed to an action (internal use only)
   
   `--help`                Show this message and exit.
 
