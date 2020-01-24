@@ -65,8 +65,8 @@ git clone https://github.com/houfu/pdpc-decisions.git
 
 * Install using `setup.py` (which will also install all dependencies. Except Chrome and ChromeDriver)
 ```shell script
-# cd pdpc-decisions
-# pip install .
+$ cd pdpc-decisions
+$ pip install .
 ```
 
 * If necessary, install [Chrome](https://www.google.com/chrome/) 
