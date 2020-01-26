@@ -14,45 +14,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
 
 
-def refresh_pages(web_driver: Chrome):
-    group_pages = web_driver.find_element_by_class_name('group__pages')
-    return group_pages.find_elements_by_class_name('page-number')
-
-
 def scrape():
-    print('Setting up webdriver')
-    # Setup webdriver
-    options = Options()
-
-    # Uncomment the next three lines for a headless chrome
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--window-size=1920,1080')
-    options.add_argument('--no-sandbox')
-
-    driver = Chrome(options=options)
-    driver.implicitly_wait(5)
-    result = []
-
-    print('Starting the scrape')
-    pdpc_decision_site_url = "https://www.pdpc.gov.sg/Commissions-Decisions/Data-Protection-Enforcement-Cases"
-    try:
-        driver.get(pdpc_decision_site_url)
-        pages = refresh_pages(driver)
-        for page_count in range(len(pages)):
-            pages[page_count].click()
-            print("Now at Page ", page_count)
-            pages = refresh_pages(driver)
-            decisions = driver.find_elements_by_class_name('press-item')
-            for decision in decisions:
-                item = PDPCDecisionItem(decision)
-                print("Added:", item)
-                result.append(item)
-        print("No of items in result: ", len(result))
-    finally:
-        driver.close()
-    print('Ending scrape.')
-    return result
+    scraper = Scraper()
+    return scraper.scrape()
 
 
 def get_url(item: WebElement):
@@ -76,6 +40,43 @@ def get_respondent(item: WebElement):
 
 def get_title(item: WebElement):
     return item.find_element_by_tag_name('a').text
+
+
+class Scraper:
+    def __init__(self):
+        options = Options()
+        # Uncomment the next three lines for a headless chrome
+        options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--window-size=1920,1080')
+        options.add_argument('--no-sandbox')
+
+        self.driver = Chrome(options=options)
+        self.driver.implicitly_wait(5)
+
+    def refresh_pages(self):
+        group_pages = self.driver.find_element_by_class_name('group__pages')
+        return group_pages.find_elements_by_class_name('page-number')
+
+    def scrape(self, site_url="https://www.pdpc.gov.sg/Commissions-Decisions/Data-Protection-Enforcement-Cases"):
+        print('Starting the scrape')
+        result = []
+        try:
+            self.driver.get(site_url)
+            pages = self.refresh_pages()
+            for page_count in range(len(pages)):
+                pages[page_count].click()
+                print("Now at Page ", page_count)
+                pages = self.refresh_pages()
+                decisions = self.driver.find_elements_by_class_name('press-item')
+                for decision in decisions:
+                    item = PDPCDecisionItem(decision)
+                    print("Added:", item)
+                    result.append(item)
+        finally:
+            self.driver.close()
+            print('Ending scrape.')
+        return result
 
 
 class PDPCDecisionItem:
