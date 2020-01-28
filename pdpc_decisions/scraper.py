@@ -54,6 +54,9 @@ class Scraper:
         self.driver = Chrome(options=options)
         self.driver.implicitly_wait(5)
 
+    def __del__(self):
+        self.driver.close()
+
     def refresh_pages(self):
         group_pages = self.driver.find_element_by_class_name('group__pages')
         return group_pages.find_elements_by_class_name('page-number')

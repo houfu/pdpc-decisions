@@ -1,5 +1,4 @@
 import pytest
-import os
 
 
 @pytest.fixture
@@ -22,7 +21,7 @@ def decisions_test_items():
     options.add_argument('--no-sandbox')
 
     selenium_test = Chrome(options=options)
-    selenium_test.get(os.getcwd() + 'tests/test_page.html')
+    selenium_test.get('https://raw.githubusercontent.com/houfu/pdpc-decisions/master/tests/test_page.html')
     yield selenium_test.find_elements_by_class_name('press-item')
     selenium_test.close()
 
@@ -39,5 +38,4 @@ def options_test():
         'csv_path': 'tests/temp_csv.csv',
         'download_folder': 'tests/download/',
         "corpus_folder": 'tests/download/',
-        "root": os.getcwd()
     }

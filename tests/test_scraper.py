@@ -58,10 +58,7 @@ def test_scraper_init():
 
 
 def test_scraper_scrape(decisions_gold):
-    import os
-    import pathlib
     scraper = Scraper()
-    site_url= pathlib.Path(os.getcwd() + '/tests/test_page.html').as_uri()
-    print(site_url)
-    result = scraper.scrape(site_url=site_url)
+    result = scraper.scrape(
+        site_url='https://raw.githubusercontent.com/houfu/pdpc-decisions/master/tests/test_page.html')
     assert len(result) == len(decisions_gold) * 26
