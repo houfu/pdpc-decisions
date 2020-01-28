@@ -1,11 +1,17 @@
 ---
 language: python
-before_install:
-  - "sudo apt-get -y chromium chromium-chromedriver"
+dist: bionic
 install:
   - "pip install -r requirements-dev.txt"
+before_script:
+  # google chrome standalone driver
+  - "wget https://chromedriver.storage.googleapis.com/index.html?path=79.0.3945.36/"
+  - "unzip chromedriver_linux64.zip"
+  - "sudo mv chromedriver /usr/local/bin"
+  - "sudo chmod a+x /usr/local/bin/chromedriver"
 script:
   - pytest
 addons:
   apt:
     update: true
+  chrome: stable
