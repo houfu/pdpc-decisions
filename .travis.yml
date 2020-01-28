@@ -1,10 +1,11 @@
-  language: python
-  before_install:
-    - sudo apt-get -y chromium chromium-chromedriver
-  install:
-    - pip install -r requirements-dev.txt
-  addons:
-    apt:
-      update: true
-  script:
-    - pytest
+---
+language: python
+before_install:
+  - "sudo apt-get -y chromium chromium-chromedriver"
+install:
+  - "pip install -r requirements-dev.txt"
+script:
+  - pytest
+addons:
+  apt:
+    update: true
