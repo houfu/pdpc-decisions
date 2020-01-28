@@ -61,6 +61,10 @@ nosetests.xml
 coverage.xml
 *,cover
 .hypothesis/
+.pytest_cache/
+.travis.yml
+pytest.ini
+requirements-dev.txt
 
 # Translations
 *.mo
