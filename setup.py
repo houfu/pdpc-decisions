@@ -11,5 +11,6 @@ setup(
     author_email='houfu@outlook.sg',
     url='https://github.com/houfu/pdpc-decisions/',
     packages=['pdpc_decisions'],
-    install_requires=['Click', 'selenium', 'pymongo', 'wget', 'beautifulsoup4', 'pdfminer', 'html5lib', 'dnspython']
+    install_requires=['Click', 'selenium', 'pymongo', 'wget', 'beautifulsoup4', 'pdfminer', 'html5lib', 'dnspython',
+                      'requests', 'pytest']
 )
