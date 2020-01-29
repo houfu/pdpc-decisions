@@ -93,6 +93,16 @@ class PDPCDecisionItem:
     def __str__(self):
         return "PDPCDecision object: {} {}".format(self.date, self.respondent)
 
+    def __eq__(self, other):
+        if self.date == other.date and \
+                self.download_url == other.download_url and \
+                self.title == other.title and \
+                self.summary == other.summary and \
+                self.respondent == other.respondent:
+            return True
+        else:
+            return False
+
 
 if __name__ == '__main__':
     scrape()

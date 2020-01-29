@@ -11,17 +11,17 @@ def chrome_options(chrome_options):
 
 
 @pytest.fixture(scope='module')
-def decisions_test_items():
+def decisions_test_items(get_test_page_url):
     from selenium.webdriver import Chrome
     from selenium.webdriver.chrome.options import Options
-    options=Options()
+    options = Options()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--no-sandbox')
 
     selenium_test = Chrome(options=options)
-    selenium_test.get('https://raw.githubusercontent.com/houfu/pdpc-decisions/master/tests/test_page.html')
+    selenium_test.get(get_test_page_url)
     yield selenium_test.find_elements_by_class_name('press-item')
     selenium_test.close()
 
@@ -39,3 +39,10 @@ def options_test():
         'download_folder': 'tests/download/',
         "corpus_folder": 'tests/download/',
     }
+
+
+@pytest.fixture(scope='module')
+def get_test_page_url():
+    import os
+    import pathlib
+    return pathlib.Path(os.getcwd() + '/tests/test_page.html').as_uri()

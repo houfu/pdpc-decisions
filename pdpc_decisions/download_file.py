@@ -22,11 +22,13 @@ def download_files(options, items):
         print("Date of Decision: ", item.date)
         print("Respondent: ", item.respondent)
         if url[-3:] == 'pdf':
-            destination = "{}{} {}.pdf".format(options["download_folder"], item.date.strftime('%Y-%m-%d'), item.respondent)
+            destination = "{}{} {}.pdf".format(options["download_folder"], item.date.strftime('%Y-%m-%d'),
+                                               item.respondent)
             wget.download(url, out=destination)
             print("Downloaded a pdf: ", destination)
         else:
-            destination = "{}{} {}.txt".format(options["download_folder"], item.date.strftime('%Y-%m-%d'), item.respondent)
+            destination = "{}{} {}.txt".format(options["download_folder"], item.date.strftime('%Y-%m-%d'),
+                                               item.respondent)
             with open(destination, "w", encoding='utf-8') as f:
                 from bs4 import BeautifulSoup
                 from urllib.request import urlopen
@@ -55,7 +57,7 @@ def get_text_from_pdf(filename):
 
 
 def remove_extra_linebreaks(source):
-    return [x for x in source if x != '' or not re.search(r'^\s+$', x)]
+    return [x for x in source if x != '' and not re.search(r'^\s+$', x)]
 
 
 def remove_numbers_as_first_characters(source):
@@ -63,11 +65,20 @@ def remove_numbers_as_first_characters(source):
 
 
 def remove_citations(source):
-    return [x for x in source if not re.search(r'^\[\d{4}]\s+(?:\d\s+)?[A-Z|()]+\s+\d+[\s.]?$', x)]
+    return [x for x in source if not re.search(r'^\s+\[\d{4}]\s+(?:\d\s+)?[A-Z|()]+\s+\d+[\s.]?\s+$', x)]
 
 
 def remove_feed_carriage(source):
-    return [x for x in source if not re.search(r'\f', x)]
+    # identifies repeated instances (likely to be headers or footers
+    matches = [x for x in source if re.search(r'^\f', x)]
+    counts = []
+    for match in [ele for ind, ele in enumerate(matches, 1) if ele not in matches[ind:]]:
+        counts.append((match, matches.count(match)))
+    counts.sort(key=lambda match: match[1], reverse=True)
+    if counts[0][1] > 1:
+        return [x.replace('\f', '') for x in source if x != '\f' and x != counts[0][0]]
+    else:
+        return [x.replace('\f', '') for x in source if x != '\f']
 
 
 def join_sentences_in_paragraph(source):
@@ -80,6 +91,8 @@ def join_sentences_in_paragraph(source):
             paragraph_string = ''
         else:
             paragraph_string += x
+    if paragraph_string != '':
+        result.append(paragraph_string)
     return result
 
 

@@ -16,38 +16,38 @@ def test_site_url_structure(selenium):
 
 
 def test_item_dates(decisions_test_items, decisions_gold):
-    for item, idx in decisions_test_items:
+    for idx, item in enumerate(decisions_test_items):
         result = get_date(item)
-        assert result == decisions_gold[idx]['date']
+        assert result == decisions_gold[idx].date
 
 
 def test_item_respondent(decisions_test_items, decisions_gold):
-    for item, idx in decisions_test_items:
+    for idx, item in enumerate(decisions_test_items):
         result = get_respondent(item)
-        assert result == decisions_gold[idx]['respondent']
+        assert result == decisions_gold[idx].respondent
 
 
 def test_item_summary(decisions_test_items, decisions_gold):
-    for item, idx in decisions_test_items:
+    for idx, item in enumerate(decisions_test_items):
         result = get_summary(item)
-        assert result == decisions_gold[idx]['summary']
+        assert result == decisions_gold[idx].summary
 
 
 def test_item_title(decisions_test_items, decisions_gold):
-    for item, idx in decisions_test_items:
+    for idx, item in enumerate(decisions_test_items):
         result = get_title(item)
-        assert result == decisions_gold[idx]['title']
+        assert result == decisions_gold[idx].title
 
 
 def test_item_download_url(decisions_test_items, decisions_gold):
-    for item, idx in decisions_test_items:
+    for idx, item in enumerate(decisions_test_items):
         result = get_url(item)
-        assert result[-10:] == decisions_gold[idx]['download_url'][
+        assert result[-10:] == decisions_gold[idx].download_url[
                                -10:]  # Final ten characters only as url front may chage from site to site
 
 
 def test_item_conversion(decisions_test_items, decisions_gold):
-    for item, idx in decisions_test_items:
+    for idx, item in enumerate(decisions_test_items):
         result = PDPCDecisionItem(item)
         assert result == decisions_gold[idx]
 
@@ -57,8 +57,8 @@ def test_scraper_init():
     assert scraper
 
 
-def test_scraper_scrape(decisions_gold):
+def test_scraper_scrape(decisions_gold, get_test_page_url):
     scraper = Scraper()
     result = scraper.scrape(
-        site_url='https://raw.githubusercontent.com/houfu/pdpc-decisions/master/tests/test_page.html')
+        site_url=get_test_page_url)
     assert len(result) == len(decisions_gold) * 26
