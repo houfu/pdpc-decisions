@@ -5,7 +5,7 @@ import os
 import re
 import shutil
 
-import wget
+import requests
 from pdfminer.converter import TextConverter
 from pdfminer.layout import LAParams
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
@@ -17,27 +17,40 @@ def download_files(options, items):
     if not os.path.exists(options["download_folder"]):
         os.mkdir(options["download_folder"])
     for item in items:
-        url = item.download_url
-        print("Downloading a File: ", url)
+        print("Downloading a File: ", item.download_url)
         print("Date of Decision: ", item.date)
         print("Respondent: ", item.respondent)
-        if url[-3:] == 'pdf':
-            destination = "{}{} {}.pdf".format(options["download_folder"], item.date.strftime('%Y-%m-%d'),
-                                               item.respondent)
-            wget.download(url, out=destination)
-            print("Downloaded a pdf: ", destination)
+        if item.download_url[-3:] == 'pdf':
+            download_pdf(options["download_folder"], item)
         else:
-            destination = "{}{} {}.txt".format(options["download_folder"], item.date.strftime('%Y-%m-%d'),
-                                               item.respondent)
-            with open(destination, "w", encoding='utf-8') as f:
-                from bs4 import BeautifulSoup
-                from urllib.request import urlopen
-                soup = BeautifulSoup(urlopen(url), 'html5lib')
-                text = soup.find('div', class_='rte').getText()
-                lines = re.split(r"\n\s+", text)
-                f.writelines([line + '\n' for line in lines if line != ""])
-            print("Downloaded a text: ", destination)
+            download_text(options["download_folder"], item)
     print('Finished downloading files to ', options["download_folder"])
+
+
+def download_pdf(download_folder, item):
+    destination_filename = "{} {}.pdf".format(item.date.strftime('%Y-%m-%d'), item.respondent)
+    destination = os.path.join(download_folder, destination_filename)
+    with open(destination, 'wb') as file:
+        pdf_file = requests.get(item.download_url)
+        file.write(pdf_file)
+    print("Downloaded a pdf: ", destination)
+    return destination
+
+
+def download_text(download_folder, item):
+    destination_filename = "{} {}.txt".format(item.date.strftime('%Y-%m-%d'),
+                                              item.respondent)
+    destination = os.path.join(download_folder, destination_filename)
+    with open(destination, "w", encoding='utf-8') as f:
+        from bs4 import BeautifulSoup
+        from urllib.request import urlopen
+        soup = BeautifulSoup(urlopen(item.download_url), 'html5lib')
+        text = soup.find('div', class_='rte').getText()
+        assert text, 'Download_text failed to get text from web page.'
+        lines = re.split(r"\n\s+", text)
+        f.writelines([line + '\n' for line in lines if line != ""])
+    print("Downloaded a text: ", destination)
+    return destination
 
 
 def get_text_from_pdf(filename):

@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import pytest
 
 
@@ -29,20 +32,28 @@ def decisions_test_items(get_test_page_url):
 @pytest.fixture(scope="module")
 def decisions_gold():
     import pickle
-    return pickle.load(open('tests/decisions', 'rb'))
+    return pickle.load(open(os.path.join(os.getcwd(), 'tests', 'decisions'), 'rb'))
 
 
 @pytest.fixture(scope='module')
 def options_test():
     return {
-        'csv_path': 'tests/temp_csv.csv',
-        'download_folder': 'tests/download/',
-        "corpus_folder": 'tests/download/',
+        'csv_path': 'tests/temp.csv',
+        'download_folder': 'tests/downloads/',
+        "corpus_folder": 'tests/corpus/',
     }
 
 
 @pytest.fixture(scope='module')
 def get_test_page_url():
-    import os
-    import pathlib
-    return pathlib.Path(os.getcwd() + '/tests/test_page.html').as_uri()
+    return Path(os.getcwd() + '/tests/test_page.html').as_uri()
+
+
+@pytest.fixture(scope='module')
+def get_test_pdf_path():
+    return Path(os.getcwd(), 'tests', 'test.pdf')
+
+
+@pytest.fixture(scope='module')
+def get_test_txt_path():
+    return Path(os.getcwd(), 'tests', 'test_text_page.htm')

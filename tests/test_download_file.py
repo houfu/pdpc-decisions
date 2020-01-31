@@ -1,5 +1,8 @@
+import os
+
 from pdpc_decisions.download_file import remove_extra_linebreaks, remove_numbers_as_first_characters, \
-    remove_feed_carriage, remove_citations, join_sentences_in_paragraph, clean_up_source
+    remove_feed_carriage, remove_citations, join_sentences_in_paragraph, clean_up_source, get_text_from_pdf, \
+    download_text
 
 
 def test_remove_extra_linebreaks():
@@ -139,3 +142,55 @@ def test_clean_up_source():
                 'No  directions  are  required  as  the Organisation  implemented  corrective  measures  that  ' \
                 'addressed  the  gap  in  its  security arrangements. '
     assert result == gold_text
+
+
+def test_get_text_from_pdf(get_test_pdf_path):
+    assert get_text_from_pdf(get_test_pdf_path)
+
+
+# def test_download_pdf(options_test, decisions_gold, get_test_pdf_path):
+#     if not os.path.exists(options_test["download_folder"]):
+#         os.mkdir(options_test["download_folder"])
+#     decision = decisions_gold[0]
+#     decision.download_url = str(get_test_pdf_path)
+#     try:
+#         destination = download_pdf(options_test['download_folder'], decision)
+#         assert destination == "{}{} {}.pdf".format(options_test['download_folder'], '2019-08-02',
+#                                                    'Avant Logistic Service')
+#         assert os.path.isfile(destination)
+#     finally:
+#         os.remove(destination)
+
+
+def test_download_text(options_test, decisions_gold, get_test_txt_path):
+    if not os.path.exists(options_test["download_folder"]):
+        os.mkdir(options_test["download_folder"])
+    decision = decisions_gold[0]
+    decision.download_url = get_test_txt_path.as_uri()
+    try:
+        destination = download_text(options_test['download_folder'], decision)
+        assert destination == "{}{} {}.txt".format(options_test['download_folder'], '2019-08-02',
+                                                   'Avant Logistic Service')
+        assert os.path.isfile(destination)
+        with open(destination, 'r') as file:
+            assert file.readlines()
+    finally:
+        os.remove(destination)
+
+# def test_download_files(options_test, decisions_gold, get_test_txt_path, get_test_pdf_path):
+#     test_decisions = decisions_gold.copy()
+#     test_decisions[0].download_url = get_test_txt_path.as_uri()
+#     for idx in range(1, 5):
+#         test_decisions[idx].download_url = get_test_pdf_path.as_uri()
+#     try:
+#         download_files(options_test, test_decisions)
+#         file_list = os.listdir(options_test['download_folder'])
+#         assert len(file_list) == 5
+#         assert file_list.index('2019-08-02 Avant Logistic Service.txt')
+#         assert file_list.index('2019-08-02 Horizon Fast Ferry.pdf')
+#         assert file_list.index('2019-08-02 Genki Sushi.pdf')
+#         assert file_list.index('2019-08-02 Championtutor.pdf')
+#         assert file_list.index('2019-08-02 CDP and Toppan Security Printing.pdf')
+#     finally:
+#         import shutil
+#         shutil.rmtree(options_test['download_folder'])
