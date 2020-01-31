@@ -1,3 +1,5 @@
+#  MIT License Copyright (c) 2020. Houfu Ang
+
 import requests
 
 from pdpc_decisions.scraper import get_url, get_respondent, get_date, get_summary, get_title, PDPCDecisionItem, Scraper
@@ -42,14 +44,18 @@ def test_item_title(decisions_test_items, decisions_gold):
 def test_item_download_url(decisions_test_items, decisions_gold):
     for idx, item in enumerate(decisions_test_items):
         result = get_url(item)
-        assert result[-10:] == decisions_gold[idx].download_url[
-                               -10:]  # Final ten characters only as url front may chage from site to site
+        assert result[-15:] == decisions_gold[idx].download_url[
+                               -15:]  # Final ten characters only as url front may change from site to site
 
 
 def test_item_conversion(decisions_test_items, decisions_gold):
     for idx, item in enumerate(decisions_test_items):
         result = PDPCDecisionItem(item)
-        assert result == decisions_gold[idx]
+        assert result.date == decisions_gold[idx].date
+        assert result.download_url[-15:] == decisions_gold[idx].download_url[-15:]
+        assert result.respondent == decisions_gold[idx].respondent
+        assert result.summary == decisions_gold[idx].summary
+        assert result.title == decisions_gold[idx].title
 
 
 def test_scraper_init():

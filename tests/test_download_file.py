@@ -1,8 +1,10 @@
+#  MIT License Copyright (c) 2020. Houfu Ang
+
 import os
 
 from pdpc_decisions.download_file import remove_extra_linebreaks, remove_numbers_as_first_characters, \
     remove_feed_carriage, remove_citations, join_sentences_in_paragraph, clean_up_source, get_text_from_pdf, \
-    download_text
+    download_text, download_pdf, download_files, create_corpus
 
 
 def test_remove_extra_linebreaks():
@@ -148,18 +150,19 @@ def test_get_text_from_pdf(get_test_pdf_path):
     assert get_text_from_pdf(get_test_pdf_path)
 
 
-# def test_download_pdf(options_test, decisions_gold, get_test_pdf_path):
-#     if not os.path.exists(options_test["download_folder"]):
-#         os.mkdir(options_test["download_folder"])
-#     decision = decisions_gold[0]
-#     decision.download_url = str(get_test_pdf_path)
-#     try:
-#         destination = download_pdf(options_test['download_folder'], decision)
-#         assert destination == "{}{} {}.pdf".format(options_test['download_folder'], '2019-08-02',
-#                                                    'Avant Logistic Service')
-#         assert os.path.isfile(destination)
-#     finally:
-#         os.remove(destination)
+def test_download_pdf(options_test, decisions_gold, get_test_pdf_url):
+    if not os.path.exists(options_test["download_folder"]):
+        os.mkdir(options_test["download_folder"])
+    decision = decisions_gold[0]
+    decision.download_url = get_test_pdf_url
+    destination = ''
+    try:
+        destination = download_pdf(options_test['download_folder'], decision)
+        assert destination == "{}{} {}.pdf".format(options_test['download_folder'], '2019-08-02',
+                                                   'Avant Logistic Service')
+        assert os.path.isfile(destination)
+    finally:
+        os.remove(destination)
 
 
 def test_download_text(options_test, decisions_gold, get_test_txt_path):
@@ -167,6 +170,7 @@ def test_download_text(options_test, decisions_gold, get_test_txt_path):
         os.mkdir(options_test["download_folder"])
     decision = decisions_gold[0]
     decision.download_url = get_test_txt_path.as_uri()
+    destination = ''
     try:
         destination = download_text(options_test['download_folder'], decision)
         assert destination == "{}{} {}.txt".format(options_test['download_folder'], '2019-08-02',
@@ -177,20 +181,42 @@ def test_download_text(options_test, decisions_gold, get_test_txt_path):
     finally:
         os.remove(destination)
 
-# def test_download_files(options_test, decisions_gold, get_test_txt_path, get_test_pdf_path):
-#     test_decisions = decisions_gold.copy()
-#     test_decisions[0].download_url = get_test_txt_path.as_uri()
-#     for idx in range(1, 5):
-#         test_decisions[idx].download_url = get_test_pdf_path.as_uri()
-#     try:
-#         download_files(options_test, test_decisions)
-#         file_list = os.listdir(options_test['download_folder'])
-#         assert len(file_list) == 5
-#         assert file_list.index('2019-08-02 Avant Logistic Service.txt')
-#         assert file_list.index('2019-08-02 Horizon Fast Ferry.pdf')
-#         assert file_list.index('2019-08-02 Genki Sushi.pdf')
-#         assert file_list.index('2019-08-02 Championtutor.pdf')
-#         assert file_list.index('2019-08-02 CDP and Toppan Security Printing.pdf')
-#     finally:
-#         import shutil
-#         shutil.rmtree(options_test['download_folder'])
+
+def test_download_files(options_test, decisions_gold, get_test_txt_path, get_test_pdf_url):
+    test_decisions = decisions_gold.copy()
+    test_decisions[0].download_url = get_test_txt_path.as_uri()
+    for idx in range(1, 5):
+        test_decisions[idx].download_url = get_test_pdf_url
+    try:
+        download_files(options_test, test_decisions)
+        file_list = os.listdir(options_test['download_folder'])
+        file_list.index('2019-08-02 Avant Logistic Service.txt')
+        file_list.index('2019-08-02 Genki Sushi.pdf')
+        file_list.index('2019-08-02 Championtutor.pdf')
+        file_list.index('2019-08-02 CDP and Toppan Security Printing.pdf')
+        file_list.index('2019-08-02 Horizon Fast Ferry.pdf')
+    finally:
+        import shutil
+        shutil.rmtree(options_test['download_folder'])
+
+
+def test_create_corpus(options_test, decisions_gold, get_test_txt_path, get_test_pdf_url):
+    test_decisions = decisions_gold.copy()
+    test_decisions[0].download_url = get_test_txt_path.as_uri()
+    for idx in range(1, 5):
+        test_decisions[idx].download_url = get_test_pdf_url
+    try:
+        create_corpus(options_test, test_decisions)
+        gold_file_list = ['2019-08-02 Avant Logistic Service.txt', '2019-08-02 Genki Sushi.txt',
+                          '2019-08-02 Championtutor.txt', '2019-08-02 CDP and Toppan Security Printing.txt',
+                          '2019-08-02 Horizon Fast Ferry.txt']
+        file_list = os.listdir(options_test['corpus_folder'])
+        for file in gold_file_list:
+            file_list.index(file)
+            file_path = options_test['corpus_folder'] + file
+            with open(file_path, 'r') as f:
+                assert f.readlines()
+    finally:
+        import shutil
+        shutil.rmtree(options_test['download_folder'])
+        shutil.rmtree(options_test['corpus_folder'])

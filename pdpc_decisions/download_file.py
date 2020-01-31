@@ -1,4 +1,4 @@
-#  MIT License Copyright (c) 2019. Houfu Ang
+#  MIT License Copyright (c) 2020. Houfu Ang
 
 import io
 import os
@@ -31,7 +31,7 @@ def download_pdf(download_folder, item):
     destination_filename = "{} {}.pdf".format(item.date.strftime('%Y-%m-%d'), item.respondent)
     destination = os.path.join(download_folder, destination_filename)
     with open(destination, 'wb') as file:
-        pdf_file = requests.get(item.download_url)
+        pdf_file = requests.get(item.download_url).content
         file.write(pdf_file)
     print("Downloaded a pdf: ", destination)
     return destination
@@ -125,7 +125,9 @@ def clean_up_source(text):
 
 def create_corpus(options, items):
     print('Now creating corpus.')
-    file_count = len(list(os.scandir(options["download_folder"])))
+    file_count = 0
+    if os.path.exists(options["download_folder"]):
+        file_count = len(list(os.scandir(options["download_folder"])))
     if file_count != len(items):
         print('Create corpus needs to download all files to start.')
         if file_count != 0:

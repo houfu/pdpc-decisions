@@ -1,3 +1,5 @@
+#  MIT License Copyright (c) 2020. Houfu Ang
+
 import os
 from pathlib import Path
 
@@ -25,8 +27,7 @@ def decisions_test_items(get_test_page_url):
 
     selenium_test = Chrome(options=options)
     selenium_test.get(get_test_page_url)
-    yield selenium_test.find_elements_by_class_name('press-item')
-    selenium_test.close()
+    return selenium_test.find_elements_by_class_name('press-item')
 
 
 @pytest.fixture(scope="module")
@@ -52,6 +53,11 @@ def get_test_page_url():
 @pytest.fixture(scope='module')
 def get_test_pdf_path():
     return Path(os.getcwd(), 'tests', 'test.pdf')
+
+
+@pytest.fixture(scope='module')
+def get_test_pdf_url():
+    return "https://github.com/houfu/pdpc-decisions/raw/master/tests/test.pdf"
 
 
 @pytest.fixture(scope='module')
