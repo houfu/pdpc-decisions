@@ -2,9 +2,9 @@
 
 import os
 
-from pdpc_decisions.download_file import remove_extra_linebreaks, remove_numbers_as_first_characters, \
-    remove_feed_carriage, remove_citations, join_sentences_in_paragraph, clean_up_source, get_text_from_pdf, \
-    download_text, download_pdf, download_files, create_corpus
+import pytest
+
+import pdpc_decisions.download_file as download
 
 
 def test_remove_extra_linebreaks():
@@ -15,7 +15,7 @@ def test_remove_extra_linebreaks():
     gold_text = ['PERSONAL DATA PROTECTION COMMISSION ', 'Case No. DP-1810-B2869 ',
                  'In the matter of an investigation under section 50(1) of the  ',
                  'Personal Data Protection Act 2012 ', '1. ', 'And ', 'ERGO Insurance Pte. Ltd. ']
-    result = remove_extra_linebreaks(test_text)
+    result = download.remove_extra_linebreaks(test_text)
     assert result == gold_text
 
 
@@ -26,7 +26,7 @@ def test_remove_numbers_as_first_characters():
     gold_text = ['PERSONAL DATA PROTECTION COMMISSION ', 'Case No. DP-1810-B2869 ',
                  'In the matter of an investigation under section 50(1) of the  ',
                  'Personal Data Protection Act 2012 ', 'And ', 'ERGO Insurance Pte. Ltd. ']
-    result = remove_numbers_as_first_characters(test_text)
+    result = download.remove_numbers_as_first_characters(test_text)
     assert result == gold_text
 
 
@@ -37,11 +37,11 @@ def test_remove_feed_carriage():
                  'with duplicate document IDs being generated and hence the wrong documents being sent ',
                  '\f', '\fSearchAsia Consulting Pte. Ltd. ',
                  '\fSearchAsia Consulting Pte. Ltd. ', '\fSearchAsia Consulting Pte. Ltd. ']
-    result = remove_feed_carriage(test_text)
     gold_text = ['when they were restarted, the Organisation’s employees had failed to follow the correct ',
                  'restart process. They were supposed to start both servers at the same time but this was ',
                  'not done as the starting of the printer server initially failed. This resulted in documents '
                  'with duplicate document IDs being generated and hence the wrong documents being sent ']
+    result = download.remove_feed_carriage(test_text)
     assert result == gold_text
 
 
@@ -49,10 +49,10 @@ def test_remove_citations():
     test_text = [' [2019] SGPDPC 40 ', '3. ',
                  'The résumés uploaded to the Website were intended to only be accessible by ',
                  '[2016] SGPDPC 19 at [51]:  ', 'see Re Tutor City [2019] SGPDPC 5 at [16]. ']
-    result = remove_citations(test_text)
     gold_text = ['3. ',
                  'The résumés uploaded to the Website were intended to only be accessible by ',
                  '[2016] SGPDPC 19 at [51]:  ', 'see Re Tutor City [2019] SGPDPC 5 at [16]. ']
+    result = download.remove_citations(test_text)
     assert result == gold_text
 
 
@@ -65,13 +65,13 @@ def test_join_sentences_in_paragraph():
         'developer  in  writing.',
         'Therefore!'
     ]
-    result = join_sentences_in_paragraph(test_text_1)
     gold_text = [
         'In  its  representations  to  the  Commission,  the  Organisation  stated  that  it  had asked'
         '  the  Developer  whether  the  résumés  uploaded  to  the  Website  would  be encrypted  and  '
         'the  Developer  responded  saying  that  “it  was  safe”.  This  does  not detract  from  the  '
         'fact  that  the  Organisation  did  not  set  out  its  instructions  to  the developer  in  writing.',
         'Therefore!']
+    result = download.join_sentences_in_paragraph(test_text_1)
     assert result == gold_text
 
 
@@ -109,7 +109,7 @@ def test_clean_up_source():
                 'and \n\ndecided  to  give  a  warning  to  the  Organisation.  ' \
                 'No  directions  are  required  as  the \n\nOrganisation  implemented  corrective  measures  that  ' \
                 'addressed  the  gap  in  its  security \n\narrangements. \n\n \n\n\f'
-    result = clean_up_source(test_text)
+    result = download.clean_up_source(test_text)
     gold_text = 'PERSONAL DATA PROTECTION COMMISSION Case No. DP-1810-B2869 ' \
                 'In the matter of an investigation under section 50(1) of the  Personal Data Protection Act 2012 ' \
                 'And ERGO Insurance Pte. Ltd. \n' \
@@ -146,8 +146,10 @@ def test_clean_up_source():
     assert result == gold_text
 
 
-def test_get_text_from_pdf(get_test_pdf_path):
-    assert get_text_from_pdf(get_test_pdf_path)
+def test_get_text_from_pdf(decisions_gold, get_test_pdf_url):
+    decision = decisions_gold[0]
+    decision.download_url = get_test_pdf_url
+    assert download.get_text_from_pdf(decision)
 
 
 def test_download_pdf(options_test, decisions_gold, get_test_pdf_url):
@@ -157,7 +159,7 @@ def test_download_pdf(options_test, decisions_gold, get_test_pdf_url):
     decision.download_url = get_test_pdf_url
     destination = ''
     try:
-        destination = download_pdf(options_test['download_folder'], decision)
+        destination = download.download_pdf(options_test['download_folder'], decision)
         assert destination == "{}{} {}.pdf".format(options_test['download_folder'], '2019-08-02',
                                                    'Avant Logistic Service')
         assert os.path.isfile(destination)
@@ -169,10 +171,10 @@ def test_download_text(options_test, decisions_gold, get_test_txt_path):
     if not os.path.exists(options_test["download_folder"]):
         os.mkdir(options_test["download_folder"])
     decision = decisions_gold[0]
-    decision.download_url = get_test_txt_path.as_uri()
+    decision.download_url = get_test_txt_path
     destination = ''
     try:
-        destination = download_text(options_test['download_folder'], decision)
+        destination = download.download_text(options_test['download_folder'], decision)
         assert destination == "{}{} {}.txt".format(options_test['download_folder'], '2019-08-02',
                                                    'Avant Logistic Service')
         assert os.path.isfile(destination)
@@ -184,11 +186,11 @@ def test_download_text(options_test, decisions_gold, get_test_txt_path):
 
 def test_download_files(options_test, decisions_gold, get_test_txt_path, get_test_pdf_url):
     test_decisions = decisions_gold.copy()
-    test_decisions[0].download_url = get_test_txt_path.as_uri()
+    test_decisions[0].download_url = get_test_txt_path
     for idx in range(1, 5):
         test_decisions[idx].download_url = get_test_pdf_url
     try:
-        download_files(options_test, test_decisions)
+        download.download_files(options_test, test_decisions)
         file_list = os.listdir(options_test['download_folder'])
         file_list.index('2019-08-02 Avant Logistic Service.txt')
         file_list.index('2019-08-02 Genki Sushi.pdf')
@@ -202,11 +204,11 @@ def test_download_files(options_test, decisions_gold, get_test_txt_path, get_tes
 
 def test_create_corpus(options_test, decisions_gold, get_test_txt_path, get_test_pdf_url):
     test_decisions = decisions_gold.copy()
-    test_decisions[0].download_url = get_test_txt_path.as_uri()
+    test_decisions[0].download_url = get_test_txt_path
     for idx in range(1, 5):
         test_decisions[idx].download_url = get_test_pdf_url
     try:
-        create_corpus(options_test, test_decisions)
+        download.create_corpus(options_test, test_decisions)
         gold_file_list = ['2019-08-02 Avant Logistic Service.txt', '2019-08-02 Genki Sushi.txt',
                           '2019-08-02 Championtutor.txt', '2019-08-02 CDP and Toppan Security Printing.txt',
                           '2019-08-02 Horizon Fast Ferry.txt']
@@ -218,5 +220,22 @@ def test_create_corpus(options_test, decisions_gold, get_test_txt_path, get_test
                 assert f.readlines()
     finally:
         import shutil
-        shutil.rmtree(options_test['download_folder'])
         shutil.rmtree(options_test['corpus_folder'])
+
+
+@pytest.mark.skip('Implementation is still wonky.')
+def test_get_text_stream(get_test_txt_path, decisions_gold):
+    test_decisions = decisions_gold.copy()
+    test_decisions[0].download_url = get_test_txt_path
+    result = download.get_text_stream(test_decisions[0])
+    gold_text = 'Breach of the Protection and Accountability Obligations by Global Outsource Solutions \n' \
+                '05 Dec 2019 \n' \
+                "Global Outsource Solutions was found in breach of the PDPA for failing to put in place " \
+                "reasonable security arrangements to protect the personal data collected by its website " \
+                "and for failing to develop and implement data protection policies. " \
+                "This resulted in the disclosure of personal data of customers on the organisation’s " \
+                "online warranty registration portal." \
+                'Global Outsource Solutions was directed to develop and implement policies for ' \
+                'data protection and staff training in data protection, ' \
+                'and to put all employees handling personal data through such training.'
+    assert result == gold_text

@@ -3,13 +3,9 @@
 import io
 import os
 import re
-import shutil
 
 import requests
-from pdfminer.converter import TextConverter
-from pdfminer.layout import LAParams
-from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-from pdfminer.pdfpage import PDFPage
+from pdfminer.high_level import extract_text_to_fp
 
 
 def download_files(options, items):
@@ -42,30 +38,32 @@ def download_text(download_folder, item):
                                               item.respondent)
     destination = os.path.join(download_folder, destination_filename)
     with open(destination, "w", encoding='utf-8') as f:
-        from bs4 import BeautifulSoup
-        from urllib.request import urlopen
-        soup = BeautifulSoup(urlopen(item.download_url), 'html5lib')
-        text = soup.find('div', class_='rte').getText()
-        assert text, 'Download_text failed to get text from web page.'
-        lines = re.split(r"\n\s+", text)
-        f.writelines([line + '\n' for line in lines if line != ""])
+        f.writelines(get_text_stream(item))
     print("Downloaded a text: ", destination)
     return destination
 
 
-def get_text_from_pdf(filename):
+def get_text_from_item(item):
+    if item.download_url[-3:] == 'pdf':
+        return clean_up_source(get_text_from_pdf(item))
+    else:
+        return clean_up_source(get_text_stream(item))
+
+
+def get_text_from_pdf(item):
     output = io.StringIO()
-    manager = PDFResourceManager()
-    converter = TextConverter(manager, output, laparams=LAParams())
-    try:
-        interpreter = PDFPageInterpreter(manager, converter)
-        with open(filename, 'rb') as infile:
-            for page in PDFPage.get_pages(infile):
-                interpreter.process_page(page)
-        text = output.getvalue()
-    finally:
-        converter.close()
-        output.close()
+    r = requests.get(item.download_url)
+    with io.BytesIO(r.content) as pdf:
+        extract_text_to_fp(pdf, output)
+    return output.getvalue()
+
+
+def get_text_stream(item):
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(requests.get(item.download_url).text)
+    rte = soup.find('div', class_='rte')
+    text = rte.get_text()
+    assert text, 'Download_text failed to get text from web page.'
     return text
 
 
@@ -87,7 +85,7 @@ def remove_feed_carriage(source):
     counts = []
     for match in [ele for ind, ele in enumerate(matches, 1) if ele not in matches[ind:]]:
         counts.append((match, matches.count(match)))
-    counts.sort(key=lambda match: match[1], reverse=True)
+    counts.sort(key=lambda m: m[1], reverse=True)
     if counts[0][1] > 1:
         return [x.replace('\f', '') for x in source if x != '\f' and x != counts[0][0]]
     else:
@@ -125,26 +123,18 @@ def clean_up_source(text):
 
 def create_corpus(options, items):
     print('Now creating corpus.')
-    file_count = 0
-    if os.path.exists(options["download_folder"]):
-        file_count = len(list(os.scandir(options["download_folder"])))
-    if file_count != len(items):
-        print('Create corpus needs to download all files to start.')
-        if file_count != 0:
-            print("There are existing items. They will be cleared before we start downloading.")
-            shutil.rmtree(options["download_folder"])
-            os.mkdir(options["download_folder"])
-        download_files(options, items)
     if not os.path.exists(options["corpus_folder"]):
         os.mkdir(options["corpus_folder"])
-    file_list = os.scandir(options["download_folder"])
-    for entry in file_list:
-        print('Now processing: {}'.format(entry.name))
-        file_name = options["corpus_folder"] + entry.name[:-4] + '.txt'
-        if entry.name[-3:] == 'pdf':
-            with open(file_name, 'w', encoding='utf-8') as fOut:
-                fOut.write(clean_up_source(get_text_from_pdf(entry.path)))
-                print("Wrote: {}".format(file_name))
-        if entry.name[-3:] == 'txt':
-            shutil.copy(entry.path, file_name)
-            print("Copied: {}".format(file_name))
+    for item in items:
+        print("Source File: ", item.download_url)
+        print("Date of Decision: ", item.date)
+        print("Respondent: ", item.respondent)
+        destination_filename = "{} {}.txt".format(item.date.strftime('%Y-%m-%d'),
+                                                  item.respondent)
+        destination = os.path.join(options["corpus_folder"], destination_filename)
+        with open(destination) as fOut:
+            text = get_text_from_item(item)
+            fOut.write(text)
+        print("Wrote: {}".format(destination))
+    print('Number of items in corpus: ', len(items))
+    print('Finished creating corpus at ', options["download_folder"])
