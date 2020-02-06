@@ -1,8 +1,6 @@
 requests
 beautifulsoup4==4.8.1
 Click==7.0
-dnspython==1.16.0
 html5lib==1.0.1
 pdfminer.six==20200124
-pymongo==3.10.0
 selenium==3.141.0

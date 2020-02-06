@@ -7,6 +7,7 @@ pdpc_decisions/corpus/
 pdpc_decisions/download/
 notebooks
 tests
+pytest.ini
 
 # Temporary files for experimentation are also excluded
 pdpc_decisions/tmp

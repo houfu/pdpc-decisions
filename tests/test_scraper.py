@@ -44,15 +44,14 @@ def test_item_title(decisions_test_items, decisions_gold):
 def test_item_download_url(decisions_test_items, decisions_gold):
     for idx, item in enumerate(decisions_test_items):
         result = get_url(item)
-        assert result[-15:] == decisions_gold[idx].download_url[
-                               -15:]  # Final ten characters only as url front may change from site to site
+        assert result == decisions_gold[idx].download_url
 
 
 def test_item_conversion(decisions_test_items, decisions_gold):
     for idx, item in enumerate(decisions_test_items):
         result = PDPCDecisionItem(item)
         assert result.date == decisions_gold[idx].date
-        assert result.download_url[-15:] == decisions_gold[idx].download_url[-15:]
+        assert result.download_url == decisions_gold[idx].download_url
         assert result.respondent == decisions_gold[idx].respondent
         assert result.summary == decisions_gold[idx].summary
         assert result.title == decisions_gold[idx].title
