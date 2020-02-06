@@ -30,8 +30,14 @@ def decisions_test_items(get_test_page_url):
     return selenium_test.find_elements_by_class_name('press-item')
 
 
-@pytest.fixture(scope="module")
-def decisions_gold():
+@pytest.fixture()
+def decisions_gold(requests_mock):
+    with open('tests/test.pdf', 'rb') as html:
+        bytes = html.read()
+    requests_mock.get('mock://get_test_pdf_url.pdf', content=bytes)
+    with open('tests/test_text_page.htm', 'r') as html:
+        text = html.read()
+    requests_mock.get('mock://get_test_txt_path', text=text)
     import pickle
     return pickle.load(open(os.path.join(os.getcwd(), 'tests', 'decisions'), 'rb'))
 
@@ -55,11 +61,17 @@ def get_test_pdf_path():
     return Path(os.getcwd(), 'tests', 'test.pdf')
 
 
-@pytest.fixture(scope='module')
-def get_test_pdf_url():
-    return "https://github.com/houfu/pdpc-decisions/raw/master/tests/test.pdf"
+@pytest.fixture()
+def get_test_pdf_url(requests_mock):
+    with open('tests/test.pdf', 'rb') as html:
+        bytes = html.read()
+    requests_mock.get('mock://get_test_pdf_url.pdf', content=bytes)
+    return 'mock://get_test_pdf_url.pdf'
 
 
-@pytest.fixture(scope='module')
-def get_test_txt_path():
-    return Path(os.getcwd(), 'tests', 'test_text_page.htm')
+@pytest.fixture()
+def get_test_txt_path(requests_mock):
+    with open('tests/test_text_page.htm', 'r') as html:
+        text = html.read()
+    requests_mock.get('mock://get_test_txt_path', text=text)
+    return 'mock://get_test_txt_path'
