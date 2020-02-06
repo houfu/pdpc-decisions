@@ -47,7 +47,7 @@ def get_text_from_item(item):
     if item.download_url[-3:] == 'pdf':
         return clean_up_source(get_text_from_pdf(item))
     else:
-        return clean_up_source(get_text_stream(item))
+        return get_text_stream(item)
 
 
 def get_text_from_pdf(item):
@@ -80,13 +80,13 @@ def remove_citations(source):
 
 
 def remove_feed_carriage(source):
-    # identifies repeated instances (likely to be headers or footers
+    # identifies repeated instances (likely to be headers or footers)
     matches = [x for x in source if re.search(r'^\f', x)]
     counts = []
     for match in [ele for ind, ele in enumerate(matches, 1) if ele not in matches[ind:]]:
         counts.append((match, matches.count(match)))
     counts.sort(key=lambda m: m[1], reverse=True)
-    if counts[0][1] > 1:
+    if len(counts) > 1 and counts[0][1] > 1:
         return [x.replace('\f', '') for x in source if x != '\f' and x != counts[0][0]]
     else:
         return [x.replace('\f', '') for x in source if x != '\f']
@@ -132,7 +132,7 @@ def create_corpus(options, items):
         destination_filename = "{} {}.txt".format(item.date.strftime('%Y-%m-%d'),
                                                   item.respondent)
         destination = os.path.join(options["corpus_folder"], destination_filename)
-        with open(destination) as fOut:
+        with open(destination, 'w') as fOut:
             text = get_text_from_item(item)
             fOut.write(text)
         print("Wrote: {}".format(destination))
