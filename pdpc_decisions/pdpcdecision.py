@@ -1,4 +1,4 @@
-#  MIT License Copyright (c) 2019. Houfu Ang
+#  MIT License Copyright (c) 2020. Houfu Ang
 
 import os
 import time
@@ -8,7 +8,6 @@ import click
 from pdpc_decisions.download_file import download_files, create_corpus
 from pdpc_decisions.save_file import save_scrape_results_to_csv
 from pdpc_decisions.scraper import scrape
-from pdpc_decisions.zeeker import zeeker_main
 
 
 @click.command()
@@ -20,9 +19,8 @@ from pdpc_decisions.zeeker import zeeker_main
               type=click.Path(file_okay=False), show_default=True)
 @click.option('--root', '-r', help='Root directory for downloads and files', type=click.Path(file_okay=False),
               default=os.getcwd(), show_default=True)
-@click.option('--action', 'sub_action', help="Option that will be passed to an action")
 @click.argument('action')
-def pdpc_decision(csv, download, corpus, action, sub_action, root):
+def pdpc_decision(csv, download, corpus, action, root):
     """
     Scripts to scrape all decisions of the Personal Data Protection Commission of Singapore.
 
@@ -35,12 +33,10 @@ def pdpc_decision(csv, download, corpus, action, sub_action, root):
     "csv"      Save the items gathered by the scraper as a csv file.
 
     "files"     Downloads all the decisions from the PDPC website into a folder.
-
-    "zeeker"    Construct or updates the zeeker database
     """
     start_time = time.time()
     options = {"csv_path": csv, "download_folder": download, "corpus_folder": corpus, "action": action,
-               "sub-action": sub_action, "root": root}
+               "root": root}
     if options['root']:
         os.chdir(root)
     scrape_results = scrape()
@@ -54,11 +50,5 @@ def pdpc_decision(csv, download, corpus, action, sub_action, root):
         download_files(options, scrape_results)
     if action == 'corpus':
         create_corpus(options, scrape_results)
-    if action == 'zeeker':
-        zeeker_main(options, scrape_results)
     diff = time.time() - start_time
     print('Finished. This took {}s.'.format(diff))
-
-
-if __name__ == '__main__':
-    pdpc_decision()
