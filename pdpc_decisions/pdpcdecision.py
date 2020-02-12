@@ -52,3 +52,7 @@ def pdpc_decision(csv, download, corpus, action, root):
         create_corpus(options, scrape_results)
     diff = time.time() - start_time
     print('Finished. This took {}s.'.format(diff))
+
+
+if __name__ == '__main__':
+    pdpc_decision()
