@@ -1,4 +1,9 @@
 # pdpc-decisions
+
+[![GitHub last commit](https://img.shields.io/github/last-commit/houfu/pdpc-decisions)](https://github.com/houfu/pdpc-decisions)
+[![Build Status](https://travis-ci.com/houfu/pdpc-decisions.svg?branch=master)](https://travis-ci.com/houfu/pdpc-decisions)
+[![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/houfu/pdpc-decisions)](https://hub.docker.com/r/houfu/pdpc-decisions)
+
 This package contains utilities which allow you to create a corpus of decisions from the 
 Personal Data Protection Commission of Singapore's 
 [Data Protection Enforcement Cases](https://www.pdpc.gov.sg/Commissions-Decisions/Data-Protection-Enforcement-Cases).
