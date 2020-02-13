@@ -137,4 +137,4 @@ def create_corpus(options, items):
             fOut.write(text)
         print("Wrote: {}".format(destination))
     print('Number of items in corpus: ', len(items))
-    print('Finished creating corpus at ', options["download_folder"])
+    print('Finished creating corpus at ', options["corpus_folder"])
