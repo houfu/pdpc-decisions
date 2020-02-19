@@ -5,7 +5,6 @@ import os
 import re
 
 import requests
-from pdfminer.high_level import extract_text
 
 
 def download_files(options, items):
@@ -51,10 +50,19 @@ def get_text_from_item(item):
 
 
 def get_text_from_pdf(item):
-    output = io.StringIO()
     r = requests.get(item.download_url)
-    with io.BytesIO(r.content) as pdf:
-        return extract_text
+    with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
+        from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+        from pdfminer.converter import TextConverter
+        from pdfminer.layout import LAParams
+        from pdfminer.pdfpage import PDFPage
+        rsrcmgr = PDFResourceManager()
+        device = TextConverter(rsrcmgr, output_string, codec='utf-8',
+                               laparams=LAParams())
+        interpreter = PDFPageInterpreter(rsrcmgr, device)
+        for page in PDFPage.get_pages(pdf, check_extractable=True):
+            interpreter.process_page(page)
+        return output_string.getvalue()
 
 
 def get_text_stream(item):
