@@ -5,7 +5,7 @@ import os
 import re
 
 import requests
-from pdfminer.high_level import extract_text_to_fp
+from pdfminer.high_level import extract_text
 
 
 def download_files(options, items):
@@ -54,8 +54,7 @@ def get_text_from_pdf(item):
     output = io.StringIO()
     r = requests.get(item.download_url)
     with io.BytesIO(r.content) as pdf:
-        extract_text_to_fp(pdf, output)
-    return output.getvalue()
+        return extract_text
 
 
 def get_text_stream(item):
