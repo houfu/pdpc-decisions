@@ -1,4 +1,3 @@
----
 language: python
 dist: bionic
 install:
@@ -15,3 +14,8 @@ addons:
   apt:
     update: true
   chrome: stable
+deploy:
+  provider: pypi
+  user: __token__
+  password:
+    secure: TcB2aYyWzT4LBa5MHyBUhkt/SVFjsWOMn86zqjPvonbgjXafsnCZJCI7ciAOvAEuHUwJMLJ6YRzLJBpVcWKc/xS6LnXiVIxDW2uuu1LY2betmW0uSOvQYfRPF8ufwZZk873WPwKIhxuQhESpP5Ph0tjGf1BsPpQFXgEkZF9J9K8qVT+Mn2SamJks1nhWUlvv4x0YWu8TB13STD1gMukKrVxuTOaQShLVPl8d8iAkVSHPv23vGNbcyJgUhPoGt9sOLbSUWv5ivVmOUpIgQt2QOOMa4CN02nwKbotybUfBHyrFBpI27n4zGdKchH22rTSrWd0yTPzaMJKNlGashytdKsYpHqfCA2uT09HRA8fu2UCwuaCL2dwCfi1p3QuCfxNZsIV/mD7CV1FLnqEJxQYrHXIb9POdfuGpSrxupAmy4yhewdUgU0FRg1CWMCTJPG7ogU4++77+pOpunxB+OMShFNVnipm2SigCy2D5P0B8sp5//cYf2Xwgik0fSS0miFZOQFJ+PJ8qtllc2lCjaBNiGJhZyQISb2mw+sqKIjQH65YKMyFBV8i89LaTDc7slvETunz/tgKrjI+UedKVF702NSnI19b358uc7/b2pP5FTL2ttsBhkmEbAbBxyAC9u/B+uAocp0bmoTPHJqdwsZsyWKhOsdJWok9JBGxSawVZxdc=
