@@ -5,7 +5,6 @@ import os
 import re
 
 import requests
-from pdfminer.high_level import extract_text_to_fp
 
 
 def download_files(options, items):
@@ -51,11 +50,19 @@ def get_text_from_item(item):
 
 
 def get_text_from_pdf(item):
-    output = io.StringIO()
     r = requests.get(item.download_url)
-    with io.BytesIO(r.content) as pdf:
-        extract_text_to_fp(pdf, output)
-    return output.getvalue()
+    with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
+        from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+        from pdfminer.converter import TextConverter
+        from pdfminer.layout import LAParams
+        from pdfminer.pdfpage import PDFPage
+        rsrcmgr = PDFResourceManager()
+        device = TextConverter(rsrcmgr, output_string, codec='utf-8',
+                               laparams=LAParams())
+        interpreter = PDFPageInterpreter(rsrcmgr, device)
+        for page in PDFPage.get_pages(pdf, check_extractable=True):
+            interpreter.process_page(page)
+        return output_string.getvalue()
 
 
 def get_text_stream(item):
@@ -137,4 +144,4 @@ def create_corpus(options, items):
             fOut.write(text)
         print("Wrote: {}".format(destination))
     print('Number of items in corpus: ', len(items))
-    print('Finished creating corpus at ', options["download_folder"])
+    print('Finished creating corpus at ', options["corpus_folder"])
