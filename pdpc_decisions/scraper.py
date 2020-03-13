@@ -28,7 +28,7 @@ def get_summary(item: WebElement):
     return item.find_element_by_class_name('rte').text.replace('\n', '. ')
 
 
-def get_date(item: WebElement):
+def get_published_date(item: WebElement):
     return datetime.strptime(item.find_element_by_class_name('press__date').text, "%d %b %Y")
 
 
@@ -81,17 +81,17 @@ class Scraper:
 
 class PDPCDecisionItem:
     def __init__(self, decision: WebElement):
-        self.date = get_date(decision)
+        self.published_date = get_published_date(decision)
         self.respondent = get_respondent(decision)
         self.title = get_title(decision)
         self.summary = get_summary(decision)
         self.download_url = get_url(decision)
 
     def __str__(self):
-        return "PDPCDecision object: {} {}".format(self.date, self.respondent)
+        return "PDPCDecision object: {} {}".format(self.published_date, self.respondent)
 
     def __eq__(self, other):
-        if self.date == other.date and \
+        if self.published_date == other.date and \
                 self.download_url == other.download_url and \
                 self.title == other.title and \
                 self.summary == other.summary and \

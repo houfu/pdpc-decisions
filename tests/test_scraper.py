@@ -2,7 +2,8 @@
 
 import requests
 
-from pdpc_decisions.scraper import get_url, get_respondent, get_date, get_summary, get_title, PDPCDecisionItem, Scraper
+from pdpc_decisions.scraper import get_url, get_respondent, get_published_date, get_summary, get_title, \
+    PDPCDecisionItem, Scraper
 
 
 def test_site_url():
@@ -19,7 +20,7 @@ def test_site_url_structure(selenium):
 
 def test_item_dates(decisions_test_items, decisions_gold):
     for idx, item in enumerate(decisions_test_items):
-        result = get_date(item)
+        result = get_published_date(item)
         assert result == decisions_gold[idx].date
 
 
@@ -50,7 +51,7 @@ def test_item_download_url(decisions_test_items, decisions_gold):
 def test_item_conversion(decisions_test_items, decisions_gold):
     for idx, item in enumerate(decisions_test_items):
         result = PDPCDecisionItem(item)
-        assert result.date == decisions_gold[idx].date
+        assert result.published_date == decisions_gold[idx].date
         assert result.download_url == decisions_gold[idx].download_url
         assert result.respondent == decisions_gold[idx].respondent
         assert result.summary == decisions_gold[idx].summary
