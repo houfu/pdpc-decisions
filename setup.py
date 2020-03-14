@@ -17,7 +17,7 @@ setup(
     long_description_content_type="text/markdown",
     packages=['pdpc_decisions'],
     install_requires=['Click', 'selenium', 'beautifulsoup4', 'pdfminer.six', 'html5lib',
-                      'requests'],
+                      'requests', 'spacy'],
     classifiers=[
         'Development Status :: 5 - Production/Stable'
     ],
