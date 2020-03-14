@@ -7,6 +7,7 @@ Requirements:
 * Chrome Webdriver to automate web browser
 """
 import re
+from dataclasses import dataclass
 from datetime import datetime
 
 from selenium.webdriver import Chrome
@@ -79,6 +80,7 @@ class Scraper:
         return result
 
 
+@dataclass
 class PDPCDecisionItem:
     def __init__(self, decision: WebElement):
         self.published_date = get_published_date(decision)
@@ -89,13 +91,3 @@ class PDPCDecisionItem:
 
     def __str__(self):
         return "PDPCDecision object: {} {}".format(self.published_date, self.respondent)
-
-    def __eq__(self, other):
-        if self.published_date == other.date and \
-                self.download_url == other.download_url and \
-                self.title == other.title and \
-                self.summary == other.summary and \
-                self.respondent == other.respondent:
-            return True
-        else:
-            return False
