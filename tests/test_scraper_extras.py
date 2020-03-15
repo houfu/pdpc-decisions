@@ -9,3 +9,9 @@ def test_get_enforcement(decisions_gold):
     assert decisions_gold[2].enforcement == [['financial', 16000]]
     assert decisions_gold[3].enforcement == [['financial', 5000]]
     assert decisions_gold[4].enforcement == [['financial', 24000], ['financial', 12000]]
+
+
+def test_get_decision_citation(decisions_gold):
+    extras.get_decision_citation(decisions_gold)
+    assert decisions_gold[0].citation == '[2020] SGPDPC 1'
+    assert decisions_gold[0].case_number == 'DP-1811-B3058'

@@ -1,9 +1,9 @@
 #  MIT License Copyright (c) 2020. Houfu Ang
-import spacy
-from spacy.matcher import Matcher
 
 
 def get_enforcement(items):
+    import spacy
+    from spacy.matcher import Matcher
     nlp = spacy.load('en_core_web_sm')
     matcher = Matcher(nlp.vocab)
     financial_penalty_pattern = [{'LOWER': 'financial'},
@@ -60,3 +60,22 @@ def get_enforcement(items):
                 result.append(directions_id)
         if result:
             item.enforcement = result
+
+
+def get_decision_citation(items):
+    from pdfminer.high_level import extract_text_to_fp
+    import requests
+    import io
+    import re
+    for item in items:
+        r = requests.get(item.download_url)
+        if item.download_url[-3:] == 'pdf':
+            with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
+                extract_text_to_fp(pdf, output_string, page_numbers=[0, 1])
+                contents = output_string.getvalue()
+            match = re.search(r'\[\d{4}]\s+(?:\d\s+)?[A-Z|()]+\s+\d+', contents)
+            if match:
+                item.citation = match.group()
+            match = re.search(r'DP-\w*-\w*', contents)
+            if match:
+                item.case_number = match.group()
