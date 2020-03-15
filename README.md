@@ -26,6 +26,7 @@ If the decision is not a PDF, collects the information provided on the decision 
 * PDF Miner
 * Selenium
 * Chrome
+* spaCy
 
 ## Installation
 

@@ -23,6 +23,8 @@ WORKDIR /code
 # Install spacy english models
 RUN pip3 install .
 
+RUN python -m spacy download en_core_web_sm
+
 # Specifies a command that will always be executed when the
 # container starts.
 # In this case we want to start the python interpreter
