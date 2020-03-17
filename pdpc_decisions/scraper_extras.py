@@ -62,20 +62,67 @@ def get_enforcement(items):
             item.enforcement = result
 
 
-def get_decision_citation(items):
+def get_decision_citation_all(items):
+    for item in items:
+        get_decision_citation_one(item)
+
+
+def get_decision_citation_one(item):
     from pdfminer.high_level import extract_text_to_fp
     import requests
     import io
     import re
+    r = requests.get(item.download_url)
+    if item.download_url[-3:] == 'pdf':
+        with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
+            extract_text_to_fp(pdf, output_string, page_numbers=[0, 1])
+            contents = output_string.getvalue()
+        match = re.search(r'\[\d{4}]\s+(?:\d\s+)?[A-Z|()]+\s+\d+', contents)
+        if match:
+            item.citation = match.group()
+        match = re.search(r'DP-\w*-\w*', contents)
+        if match:
+            item.case_number = match.group()
+
+
+def get_case_references(items):
+    import spacy
+    from spacy.matcher import Matcher
+    from .download_file import get_text_from_pdf
+    nlp = spacy.load('en_core_web_sm')
+    matcher = Matcher(nlp.vocab)
+    citation_pattern = [{"IS_BRACKET": True},
+                        {"SHAPE": "dddd"},
+                        {"IS_BRACKET": True},
+                        {"LIKE_NUM": True, "OP": "?"},
+                        {"TEXT": {"REGEX": "^[A-Z]"}, "OP": "?"},
+                        {"ORTH": ".", "OP": "?"},
+                        {"TEXT": {"REGEX": r"^[A-Z\.]"}},
+                        {"ORTH": ".", "OP": "?"},
+                        {"LIKE_NUM": True}]
+    matcher.add('citations', [citation_pattern])
+    # construct referring to index
     for item in items:
-        r = requests.get(item.download_url)
-        if item.download_url[-3:] == 'pdf':
-            with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
-                extract_text_to_fp(pdf, output_string, page_numbers=[0, 1])
-                contents = output_string.getvalue()
-            match = re.search(r'\[\d{4}]\s+(?:\d\s+)?[A-Z|()]+\s+\d+', contents)
-            if match:
-                item.citation = match.group()
-            match = re.search(r'DP-\w*-\w*', contents)
-            if match:
-                item.case_number = match.group()
+        if not hasattr(item, 'citation'):
+            get_decision_citation_one(item)
+        item.referred_by = []
+        item.referring_to = []
+        doc = nlp(get_text_from_pdf(item))
+        matches = matcher(doc)
+        for match in matches:
+            _, start, end = match
+            result_citation = doc[start:end].text
+            if not result_citation == item.citation:
+                if not hasattr(item, 'referring_to'):
+                    item.referring_to = [result_citation]
+                else:
+                    item.referring_to.append(result_citation)
+    # constructed referred by index
+    for item in items:
+        for reference in item.referring_to:
+            result_item = next((x for x in items if x.citation == reference), None)
+            if result_item:
+                if result_item.referred_by.count(item.citation) == 0:
+                    result_item.referred_by.append(item.citation)
+                else:
+                    result_item.referred_by = [item.citation]
