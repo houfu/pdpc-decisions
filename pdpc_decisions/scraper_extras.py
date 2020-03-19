@@ -107,16 +107,17 @@ def get_case_references(items):
             get_decision_citation_one(item)
         item.referred_by = []
         item.referring_to = []
-        doc = nlp(get_text_from_pdf(item))
-        matches = matcher(doc)
-        for match in matches:
-            _, start, end = match
-            result_citation = doc[start:end].text
-            if not result_citation == item.citation:
-                if not hasattr(item, 'referring_to'):
-                    item.referring_to = [result_citation]
-                else:
-                    item.referring_to.append(result_citation)
+        if item.download_url[-3:] == 'pdf':
+            doc = nlp(get_text_from_pdf(item))
+            matches = matcher(doc)
+            for match in matches:
+                _, start, end = match
+                result_citation = doc[start:end].text
+                if not result_citation == item.citation:
+                    if not hasattr(item, 'referring_to'):
+                        item.referring_to = [result_citation]
+                    else:
+                        item.referring_to.append(result_citation)
     # constructed referred by index
     for item in items:
         for reference in item.referring_to:
@@ -126,3 +127,10 @@ def get_case_references(items):
                     result_item.referred_by.append(item.citation)
                 else:
                     result_item.referred_by = [item.citation]
+
+
+def scraper_extras(items):
+    get_enforcement(items)
+    get_decision_citation_all(items)
+    get_case_references(items)
+    return True
