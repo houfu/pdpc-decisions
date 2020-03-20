@@ -73,6 +73,8 @@ def get_decision_citation_one(item):
     import io
     import re
     r = requests.get(item.download_url)
+    item.citation = ''
+    item.case_number = ''
     if item.download_url[-3:] == 'pdf':
         with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
             extract_text_to_fp(pdf, output_string, page_numbers=[0, 1])
@@ -130,7 +132,7 @@ def get_case_references(items):
 
 
 def scraper_extras(items):
-    get_enforcement(items)
     get_decision_citation_all(items)
+    get_enforcement(items)
     get_case_references(items)
     return True

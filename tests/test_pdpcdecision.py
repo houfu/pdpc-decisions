@@ -54,3 +54,14 @@ def test_pdpc_decision_root_change(mocker):
     runner.invoke(pdpc_decision, ['-r', path, 'files'])
     assert os.getcwd() == path
     os.chdir(original_path)
+
+
+def test_pdpc_decision_extras(mocker):
+    runner = CliRunner()
+    scraper = mocker.patch('pdpc_decisions.pdpcdecision.scrape')
+    extras = mocker.patch('pdpc_decisions.pdpcdecision.scraper_extras')
+    download_files = mocker.patch('pdpc_decisions.pdpcdecision.download_files')
+    runner.invoke(pdpc_decision, ['files', '--extras'])
+    scraper.assert_called()
+    extras.assert_called()
+    download_files.assert_called()

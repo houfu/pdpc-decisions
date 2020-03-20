@@ -184,7 +184,7 @@ def test_download_text(options_test, decisions_gold, get_test_txt_path):
         os.remove(destination)
 
 
-def test_download_files(options_test, decisions_gold, get_test_txt_path, get_test_pdf_url):
+def test_download_files(options_test, decisions_gold, get_test_txt_path, get_test_pdf_url, mocker):
     test_decisions = decisions_gold.copy()
     test_decisions[0].download_url = get_test_txt_path
     for idx in range(1, 5):
@@ -200,6 +200,10 @@ def test_download_files(options_test, decisions_gold, get_test_txt_path, get_tes
     finally:
         import shutil
         shutil.rmtree(options_test['download_folder'])
+
+    mkdir_func = mocker.patch.object(os, 'mkdir')
+    download.download_files(options_test, [])
+    mkdir_func.assert_called()
 
 
 def test_create_corpus(options_test, decisions_gold, get_test_txt_path, get_test_pdf_url):
