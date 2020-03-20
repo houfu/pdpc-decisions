@@ -35,6 +35,8 @@ If the decision is not a PDF, collects the information provided on the decision 
 I dockerised the application for my personal ease of use.
 It is probably the easiest and most straight-forward way 
 to use the application and I recommend it too.
+The dockerised application also contains all pre-requisites
+so there is no need for any manual installs.
 
 You need to have docker installed. 
 Pull the image from [docker hub](https://hub.docker.com/r/houfu/pdpc-decisions).
@@ -69,7 +71,8 @@ docker run \
 git clone https://github.com/houfu/pdpc-decisions.git
 ```
 
-* Install using `setup.py` (which will also install all dependencies. Except Chrome and ChromeDriver)
+* Install using `setup.py` (which will also install all dependencies. Except spacy's 'en-core-web-sm',
+Chrome and ChromeDriver)
 ```shell script
 $ cd pdpc-decisions
 $ pip install .
@@ -98,8 +101,6 @@ Accepts the following actions.
   "`files`"     Downloads all the decisions from the PDPC website into a
   folder.
 
-  "`zeeker`"    Construct or updates the zeeker database (internal use only)
-
 Options:
   
   `--csv FILE`            Filename for saving the items gathered by scraper as a
@@ -115,6 +116,7 @@ Options:
   
   `--extras/--no-extras`         Add extra features to the data collected. 
                                 (Experimental and requires reading of actual decisions)
+                                [default: *False*, '--no-extras']
   
   `--help`                Show this message and exit.
 

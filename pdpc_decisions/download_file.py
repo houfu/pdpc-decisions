@@ -67,7 +67,7 @@ def get_text_from_pdf(item):
 
 def get_text_stream(item):
     from bs4 import BeautifulSoup
-    soup = BeautifulSoup(requests.get(item.download_url).text)
+    soup = BeautifulSoup(requests.get(item.download_url).text, features='html5lib')
     rte = soup.find('div', class_='rte')
     text = rte.get_text()
     assert text, 'Download_text failed to get text from web page.'

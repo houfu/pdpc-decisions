@@ -43,5 +43,5 @@ def test_get_case_references(requests_mock):
     assert decisions[2].referred_by == []
 
 
-def test_scraper_extras(decisions_extras_gold):
-    assert extras.scraper_extras(decisions_extras_gold)
+def test_scraper_extras(decisions_gold):
+    assert extras.scraper_extras(decisions_gold)

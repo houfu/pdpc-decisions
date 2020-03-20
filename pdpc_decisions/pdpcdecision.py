@@ -20,7 +20,7 @@ from pdpc_decisions.scraper_extras import scraper_extras
               type=click.Path(file_okay=False), show_default=True)
 @click.option('--root', '-r', help='Root directory for downloads and files', type=click.Path(file_okay=False),
               default=os.getcwd(), show_default=True)
-@click.option('--extras/--no-extras', default=True)
+@click.option('--extras/--no-extras', default=False)
 @click.argument('action')
 def pdpc_decision(csv, download, corpus, action, root, extras):
     """
