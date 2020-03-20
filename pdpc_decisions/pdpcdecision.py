@@ -8,6 +8,7 @@ import click
 from pdpc_decisions.download_file import download_files, create_corpus
 from pdpc_decisions.save_file import save_scrape_results_to_csv
 from pdpc_decisions.scraper import scrape
+from pdpc_decisions.scraper_extras import scraper_extras
 
 
 @click.command()
@@ -19,8 +20,9 @@ from pdpc_decisions.scraper import scrape
               type=click.Path(file_okay=False), show_default=True)
 @click.option('--root', '-r', help='Root directory for downloads and files', type=click.Path(file_okay=False),
               default=os.getcwd(), show_default=True)
+@click.option('--extras/--no-extras', default=True)
 @click.argument('action')
-def pdpc_decision(csv, download, corpus, action, root):
+def pdpc_decision(csv, download, corpus, action, root, extras):
     """
     Scripts to scrape all decisions of the Personal Data Protection Commission of Singapore.
 
@@ -36,10 +38,12 @@ def pdpc_decision(csv, download, corpus, action, root):
     """
     start_time = time.time()
     options = {"csv_path": csv, "download_folder": download, "corpus_folder": corpus, "action": action,
-               "root": root}
+               "root": root, "extras": extras}
     if options['root']:
         os.chdir(root)
     scrape_results = scrape()
+    if extras:
+        scraper_extras(scrape_results)
     if action == 'all':
         save_scrape_results_to_csv(options, scrape_results)
         download_files(options, scrape_results)

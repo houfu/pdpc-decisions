@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='pdpc-decisions',
-    version='1.0.2',
+    version='1.1.0',
     description='Tools to extract and compile enforcement '
                 'decisions from the Singapore Personal Data Protection Commission',
     author='Ang Houfu ',
@@ -17,7 +17,7 @@ setup(
     long_description_content_type="text/markdown",
     packages=['pdpc_decisions'],
     install_requires=['Click', 'selenium', 'beautifulsoup4', 'pdfminer.six', 'html5lib',
-                      'requests'],
+                      'requests', 'spacy'],
     classifiers=[
         'Development Status :: 5 - Production/Stable'
     ],

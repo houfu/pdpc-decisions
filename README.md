@@ -26,6 +26,7 @@ If the decision is not a PDF, collects the information provided on the decision 
 * PDF Miner
 * Selenium
 * Chrome
+* spaCy
 
 ## Installation
 
@@ -112,7 +113,8 @@ Options:
   `-r, --root DIRECTORY`  Root directory for downloads and files  [default:
                         Your current working directory]
   
-  `--action TEXT`         Option that will be passed to an action (internal use only)
+  `--extras/--no-extras`         Add extra features to the data collected. 
+                                (Experimental and requires reading of actual decisions)
   
   `--help`                Show this message and exit.
 

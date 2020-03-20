@@ -13,7 +13,7 @@ def download_files(options, items):
         os.mkdir(options["download_folder"])
     for item in items:
         print("Downloading a File: ", item.download_url)
-        print("Date of Decision: ", item.date)
+        print("Date of Decision: ", item.published_date)
         print("Respondent: ", item.respondent)
         if item.download_url[-3:] == 'pdf':
             download_pdf(options["download_folder"], item)
@@ -23,7 +23,7 @@ def download_files(options, items):
 
 
 def download_pdf(download_folder, item):
-    destination_filename = "{} {}.pdf".format(item.date.strftime('%Y-%m-%d'), item.respondent)
+    destination_filename = "{} {}.pdf".format(item.published_date.strftime('%Y-%m-%d'), item.respondent)
     destination = os.path.join(download_folder, destination_filename)
     with open(destination, 'wb') as file:
         pdf_file = requests.get(item.download_url).content
@@ -33,7 +33,7 @@ def download_pdf(download_folder, item):
 
 
 def download_text(download_folder, item):
-    destination_filename = "{} {}.txt".format(item.date.strftime('%Y-%m-%d'),
+    destination_filename = "{} {}.txt".format(item.published_date.strftime('%Y-%m-%d'),
                                               item.respondent)
     destination = os.path.join(download_folder, destination_filename)
     with open(destination, "w", encoding='utf-8') as f:
@@ -134,9 +134,9 @@ def create_corpus(options, items):
         os.mkdir(options["corpus_folder"])
     for item in items:
         print("Source File: ", item.download_url)
-        print("Date of Decision: ", item.date)
+        print("Date of Decision: ", item.published_date)
         print("Respondent: ", item.respondent)
-        destination_filename = "{} {}.txt".format(item.date.strftime('%Y-%m-%d'),
+        destination_filename = "{} {}.txt".format(item.published_date.strftime('%Y-%m-%d'),
                                                   item.respondent)
         destination = os.path.join(options["corpus_folder"], destination_filename)
         with open(destination, 'w') as fOut:
