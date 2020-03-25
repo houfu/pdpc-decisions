@@ -79,7 +79,7 @@ def get_decision_citation_one(item):
         with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
             extract_text_to_fp(pdf, output_string, page_numbers=[0, 1])
             contents = output_string.getvalue()
-        match = re.search(r'\[\d{4}]\s+(?:\d\s+)?[A-Z|()]+\s+\d+', contents)
+        match = re.search(r'\[\d{4}]\s+(?:\d\s+)?[A-Z|()]+\s+\[?\d+\]?', contents)
         if match:
             item.citation = match.group()
         match = re.search(r'DP-\w*-\w*', contents)

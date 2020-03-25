@@ -10,11 +10,11 @@ def save_scrape_results_to_csv(options, scrape_results):
         if options['extras']:
             csvwriter.writerow(
                 ['published_date', 'title', 'respondent', 'summary', 'download_url', 'citation', 'referred_by',
-                 'referring_to'])
+                 'referring_to', 'enforcement'])
             for result in scrape_results:
                 csvwriter.writerow(
                     [result.published_date, result.title, result.respondent, result.summary, result.download_url,
-                     result.citation, result.referred_by, result.referring_to])
+                     result.citation, result.referred_by, result.referring_to, result.enforcement])
         else:
             csvwriter.writerow(['published_date', 'title', 'respondent', 'summary', 'download_url'])
             for result in scrape_results:
