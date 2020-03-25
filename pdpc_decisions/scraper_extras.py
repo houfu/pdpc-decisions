@@ -33,7 +33,7 @@ def get_enforcement(items):
                           {'LOWER': 'issued'}]
     directions_id = 'directions'
     matcher.add(directions_id, [directions_pattern])
-
+    print('Start adding enforcement information to items.')
     for item in items:
         doc = nlp(item.summary)
         matches = matcher(doc)
@@ -63,6 +63,7 @@ def get_enforcement(items):
 
 
 def get_decision_citation_all(items):
+    print('Start adding citation information to items.')
     for item in items:
         get_decision_citation_one(item)
 
@@ -132,7 +133,9 @@ def get_case_references(items):
 
 
 def scraper_extras(items):
+    print('Start adding extra information to items.')
     get_decision_citation_all(items)
     get_enforcement(items)
     get_case_references(items)
+    print('End adding extra information to items.')
     return True
