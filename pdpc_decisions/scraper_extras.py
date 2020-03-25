@@ -33,37 +33,35 @@ def get_enforcement(items):
                           {'LOWER': 'issued'}]
     directions_id = 'directions'
     matcher.add(directions_id, [directions_pattern])
-    print('Start adding enforcement information to items.')
+    print('Adding enforcement information to items.')
     for item in items:
         doc = nlp(item.summary)
         matches = matcher(doc)
-        result = []
+        item.enforcement = []
         for match in matches:
             match_id, _, end = match
             if nlp.vocab.strings[financial_2_id] in match:
                 span1 = doc[end - 4: end - 3]
                 value = ['financial', int(span1.text.replace(',', ''))]
-                if not result.count(value):
-                    result.append(value)
+                if not item.enforcement.count(value):
+                    item.enforcement.append(value)
                 span2 = doc[end - 1:end]
                 value = ['financial', int(span2.text.replace(',', ''))]
-                if not result.count(value):
-                    result.append(value)
+                if not item.enforcement.count(value):
+                    item.enforcement.append(value)
             if nlp.vocab.strings[financial_1_id] in match:
                 span = doc[end - 1:end]
                 value = ['financial', int(span.text.replace(',', ''))]
-                if not result.count(value):
-                    result.append(value)
+                if not item.enforcement.count(value):
+                    item.enforcement.append(value)
             if nlp.vocab.strings[warning_id] in match:
-                result.append(warning_id)
+                item.enforcement.append(warning_id)
             if nlp.vocab.strings[directions_id] in match:
-                result.append(directions_id)
-        if result:
-            item.enforcement = result
+                item.enforcement.append(directions_id)
 
 
 def get_decision_citation_all(items):
-    print('Start adding citation information to items.')
+    print('Adding citation information to items.')
     for item in items:
         get_decision_citation_one(item)
 
@@ -89,6 +87,7 @@ def get_decision_citation_one(item):
 
 
 def get_case_references(items):
+    print('Adding case reference information to items.')
     import spacy
     from spacy.matcher import Matcher
     from .download_file import get_text_from_pdf
