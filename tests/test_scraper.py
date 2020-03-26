@@ -49,7 +49,7 @@ def test_item_download_url(decisions_test_items, decisions_gold):
 
 def test_item_conversion(decisions_test_items, decisions_gold):
     for idx, item in enumerate(decisions_test_items):
-        result = scraper.PDPCDecisionItem(item)
+        result = scraper.PDPCDecisionItem.from_element(item)
         assert result.published_date == decisions_gold[idx].published_date
         assert result.download_url == decisions_gold[idx].download_url
         assert result.respondent == decisions_gold[idx].respondent

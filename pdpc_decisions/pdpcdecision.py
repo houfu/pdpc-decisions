@@ -7,7 +7,7 @@ import click
 
 from pdpc_decisions.download_file import download_files, create_corpus
 from pdpc_decisions.save_file import save_scrape_results_to_csv
-from pdpc_decisions.scraper import scrape
+from pdpc_decisions.scraper import Scraper
 from pdpc_decisions.scraper_extras import scraper_extras
 
 
@@ -41,8 +41,8 @@ def pdpc_decision(csv, download, corpus, action, root, extras):
                "root": root, "extras": extras}
     if options['root']:
         os.chdir(root)
-    scrape_results = scrape()
-    if extras:
+    scrape_results = Scraper.scrape()
+    if extras and ((action == 'all') or (action == 'csv')):
         scraper_extras(scrape_results)
     if action == 'all':
         save_scrape_results_to_csv(options, scrape_results)

@@ -59,7 +59,7 @@ def get_text_from_pdf(item):
             extract_text_to_fp(pdf, output_string)
         else:
             from pdfminer.pdfpage import PDFPage
-            pages = len([PDFPage.get_pages(pdf)])
+            pages = len([page for page in PDFPage.get_pages(pdf)])
             extract_text_to_fp(pdf, output_string, page_numbers=[i for i in range(pages)[1:]])
         return output_string.getvalue()
 
