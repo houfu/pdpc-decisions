@@ -32,7 +32,7 @@ def decisions_test_items(get_test_page_url):
 
 @pytest.fixture()
 def decisions_gold(requests_mock):
-    import scraper
+    import pdpc_decisions.scraper as scraper
     import datetime
     with open('tests/test.pdf', 'rb') as html:
         bytes = html.read()
@@ -92,7 +92,7 @@ def decisions_gold(requests_mock):
 
 @pytest.fixture()
 def decisions_extras_gold(requests_mock):
-    import scraper
+    import pdpc_decisions.scraper as scraper
     import datetime
     with open('tests/test_reference_1.pdf', 'rb') as html:
         content = html.read()
