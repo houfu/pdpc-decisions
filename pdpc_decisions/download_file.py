@@ -51,17 +51,16 @@ def get_text_from_item(item):
 
 def get_text_from_pdf(item):
     r = requests.get(item.download_url)
-    with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
-        from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-        from pdfminer.converter import TextConverter
-        from pdfminer.layout import LAParams
-        from pdfminer.pdfpage import PDFPage
-        rsrcmgr = PDFResourceManager()
-        device = TextConverter(rsrcmgr, output_string, codec='utf-8',
-                               laparams=LAParams())
-        interpreter = PDFPageInterpreter(rsrcmgr, device)
-        for page in PDFPage.get_pages(pdf, check_extractable=True):
-            interpreter.process_page(page)
+    from pdfminer.high_level import extract_text_to_fp
+    with io.BytesIO(r.content) as pdf, io.StringIO() as output_string, io.StringIO() as test_string:
+        extract_text_to_fp(pdf, test_string, page_numbers=[0])
+        first_page = test_string.getvalue()
+        if len(first_page.split()) > 100:
+            extract_text_to_fp(pdf, output_string)
+        else:
+            from pdfminer.pdfpage import PDFPage
+            pages = len([page for page in PDFPage.get_pages(pdf)])
+            extract_text_to_fp(pdf, output_string, page_numbers=[i for i in range(pages)[1:]])
         return output_string.getvalue()
 
 

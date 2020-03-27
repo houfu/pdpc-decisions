@@ -15,11 +15,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
 
 
-def scrape():
-    scraper = Scraper()
-    return scraper.scrape()
-
-
 def get_url(item: WebElement):
     link = item.find_element_by_tag_name('a')
     return link.get_property('href')
@@ -30,7 +25,7 @@ def get_summary(item: WebElement):
 
 
 def get_published_date(item: WebElement):
-    return datetime.strptime(item.find_element_by_class_name('press__date').text, "%d %b %Y")
+    return datetime.strptime(item.find_element_by_class_name('press__date').text, "%d %b %Y").date()
 
 
 def get_respondent(item: WebElement):
@@ -59,8 +54,10 @@ class Scraper:
         group_pages = self.driver.find_element_by_class_name('group__pages')
         return group_pages.find_elements_by_class_name('page-number')
 
-    def scrape(self, site_url="https://www.pdpc.gov.sg/Commissions-Decisions/Data-Protection-Enforcement-Cases"):
+    @classmethod
+    def scrape(cls, site_url="https://www.pdpc.gov.sg/Commissions-Decisions/Data-Protection-Enforcement-Cases"):
         print('Starting the scrape')
+        self = cls()
         result = []
         try:
             self.driver.get(site_url)
@@ -71,7 +68,7 @@ class Scraper:
                 pages = self.refresh_pages()
                 decisions = self.driver.find_elements_by_class_name('press-item')
                 for decision in decisions:
-                    item = PDPCDecisionItem(decision)
+                    item = PDPCDecisionItem.from_element(decision)
                     print("Added:", item)
                     result.append(item)
         finally:
@@ -82,12 +79,20 @@ class Scraper:
 
 @dataclass
 class PDPCDecisionItem:
-    def __init__(self, decision: WebElement):
-        self.published_date = get_published_date(decision)
-        self.respondent = get_respondent(decision)
-        self.title = get_title(decision)
-        self.summary = get_summary(decision)
-        self.download_url = get_url(decision)
+    published_date: datetime.date
+    respondent: str
+    title: str
+    summary: str
+    download_url: str
+
+    @classmethod
+    def from_element(cls, decision: WebElement):
+        published_date = get_published_date(decision)
+        respondent = get_respondent(decision)
+        title = get_title(decision)
+        summary = get_summary(decision)
+        download_url = get_url(decision)
+        return cls(published_date, respondent, title, summary, download_url)
 
     def __str__(self):
         return "PDPCDecision object: {} {}".format(self.published_date, self.respondent)

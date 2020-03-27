@@ -21,6 +21,19 @@ and compile a table of decisions with information from the summaries provided by
 If the decision is not a PDF, collects the information provided on the decision web page and saves it as a text file.
 * Convert the PDF files into text files
 
+## Features provided by scraper
+
+* Published date
+* Respondent
+* Title
+* Summary
+* URL of PDF of decision
+
+The features are discovered by passing `--extras` to the command.
+* **[Extras]** Citation
+* **[Extras]** Basic enforcement information (Financial penalty, warning, directions)
+* **[Extras]** References (referred by, referring to)
+
 ## What pdpc-decisions uses
 * Python 3
 * PDF Miner
@@ -114,7 +127,7 @@ Options:
   `-r, --root DIRECTORY`  Root directory for downloads and files  [default:
                         Your current working directory]
   
-  `--extras/--no-extras`         Add extra features to the data collected. 
+  `--extras/--no-extras`         Add extra features to the data collected. This increases processing time. This feature is ignored if action is `files` or `downloads`. 
                                 (Experimental and requires reading of actual decisions)
                                 [default: *False*, '--no-extras']
   

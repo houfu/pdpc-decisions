@@ -33,36 +33,35 @@ def get_enforcement(items):
                           {'LOWER': 'issued'}]
     directions_id = 'directions'
     matcher.add(directions_id, [directions_pattern])
-
+    print('Adding enforcement information to items.')
     for item in items:
         doc = nlp(item.summary)
         matches = matcher(doc)
-        result = []
+        item.enforcement = []
         for match in matches:
             match_id, _, end = match
             if nlp.vocab.strings[financial_2_id] in match:
                 span1 = doc[end - 4: end - 3]
                 value = ['financial', int(span1.text.replace(',', ''))]
-                if not result.count(value):
-                    result.append(value)
+                if not item.enforcement.count(value):
+                    item.enforcement.append(value)
                 span2 = doc[end - 1:end]
                 value = ['financial', int(span2.text.replace(',', ''))]
-                if not result.count(value):
-                    result.append(value)
+                if not item.enforcement.count(value):
+                    item.enforcement.append(value)
             if nlp.vocab.strings[financial_1_id] in match:
                 span = doc[end - 1:end]
                 value = ['financial', int(span.text.replace(',', ''))]
-                if not result.count(value):
-                    result.append(value)
+                if not item.enforcement.count(value):
+                    item.enforcement.append(value)
             if nlp.vocab.strings[warning_id] in match:
-                result.append(warning_id)
+                item.enforcement.append(warning_id)
             if nlp.vocab.strings[directions_id] in match:
-                result.append(directions_id)
-        if result:
-            item.enforcement = result
+                item.enforcement.append(directions_id)
 
 
 def get_decision_citation_all(items):
+    print('Adding citation information to items.')
     for item in items:
         get_decision_citation_one(item)
 
@@ -79,7 +78,7 @@ def get_decision_citation_one(item):
         with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
             extract_text_to_fp(pdf, output_string, page_numbers=[0, 1])
             contents = output_string.getvalue()
-        match = re.search(r'\[\d{4}]\s+(?:\d\s+)?[A-Z|()]+\s+\d+', contents)
+        match = re.search(r'\[\d{4}]\s+(?:\d\s+)?[A-Z|()]+\s+\[?\d+\]?', contents)
         if match:
             item.citation = match.group()
         match = re.search(r'DP-\w*-\w*', contents)
@@ -88,6 +87,7 @@ def get_decision_citation_one(item):
 
 
 def get_case_references(items):
+    print('Adding case reference information to items.')
     import spacy
     from spacy.matcher import Matcher
     from .download_file import get_text_from_pdf
@@ -115,11 +115,8 @@ def get_case_references(items):
             for match in matches:
                 _, start, end = match
                 result_citation = doc[start:end].text
-                if not result_citation == item.citation:
-                    if not hasattr(item, 'referring_to'):
-                        item.referring_to = [result_citation]
-                    else:
-                        item.referring_to.append(result_citation)
+                if (item.referring_to.count(result_citation) == 0) and (result_citation != item.citation):
+                    item.referring_to.append(result_citation)
     # constructed referred by index
     for item in items:
         for reference in item.referring_to:
@@ -127,12 +124,12 @@ def get_case_references(items):
             if result_item:
                 if result_item.referred_by.count(item.citation) == 0:
                     result_item.referred_by.append(item.citation)
-                else:
-                    result_item.referred_by = [item.citation]
 
 
 def scraper_extras(items):
+    print('Start adding extra information to items.')
     get_decision_citation_all(items)
     get_enforcement(items)
     get_case_references(items)
+    print('End adding extra information to items.')
     return True
