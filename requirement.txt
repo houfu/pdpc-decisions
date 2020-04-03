@@ -1,7 +1,7 @@
 requests
 beautifulsoup4==4.8.1
-Click==7.0
+Click==7.1.1
 html5lib==1.0.1
-pdfminer.six==20200124
+pdfminer.six==20200402
 selenium==3.141.0
 spacy==2.2.4

@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='pdpc-decisions',
-    version='1.1.2',
+    version='1.2.0',
     description='Tools to extract and compile enforcement '
                 'decisions from the Singapore Personal Data Protection Commission',
     author='Ang Houfu ',
@@ -22,4 +22,8 @@ setup(
         'Development Status :: 5 - Production/Stable'
     ],
     python_requires='>=3.7',
+    entry_points='''
+    [console_scripts]
+    pdpc_decisions=pdpc_decisions.pdpcdecision:pdpc_decision
+''',
 )
