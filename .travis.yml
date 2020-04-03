@@ -10,7 +10,6 @@ before_script:
   - "unzip chromedriver_linux64.zip"
   - "sudo mv chromedriver /usr/local/bin"
   - "sudo chmod a+x /usr/local/bin/chromedriver"
-  - "python -m spacy download en_core_web_sm"
 script:
   - pytest
 addons:
