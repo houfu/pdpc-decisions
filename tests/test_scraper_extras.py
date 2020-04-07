@@ -29,16 +29,16 @@ def test_get_case_references(requests_mock):
     decisions = pickle.load(open(os.path.join(os.getcwd(), 'tests', 'decisions_references.pickle'), 'rb'))
     with open('tests/test_reference_1.pdf', 'rb') as html:
         content = html.read()
-    requests_mock.get('mock://get_test_pdf_url_1.pdf', content=content)
+    requests_mock.get('mock://test/get_test_pdf_url_1.pdf', content=content)
     with open('tests/test_reference_2.pdf', 'rb') as html:
         content = html.read()
-    requests_mock.get('mock://get_test_pdf_url_2.pdf', content=content)
+    requests_mock.get('mock://test/get_test_pdf_url_2.pdf', content=content)
     with open('tests/test_reference_3.pdf', 'rb') as html:
         content = html.read()
-    requests_mock.get('mock://get_test_pdf_url_3.pdf', content=content)
+    requests_mock.get('mock://test/get_test_pdf_url_3.pdf', content=content)
     with open('tests/test.pdf', 'rb') as html:
         bytes = html.read()
-    requests_mock.get('mock://get_test_pdf_url.pdf', content=bytes)
+    requests_mock.get('mock://test/get_test_pdf_url.pdf', content=bytes)
 
     extras.get_case_references(decisions)
     assert decisions[0].referring_to == ['[2020] SGPDPC 3', '[2019] SGPDPC 1', '[2016] SGPDPC 5']

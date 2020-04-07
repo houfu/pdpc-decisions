@@ -1,5 +1,6 @@
 #  MIT License Copyright (c) 2020. Houfu Ang
 
+import logging
 import os
 import time
 
@@ -21,8 +22,9 @@ from pdpc_decisions.scraper_extras import scraper_extras
 @click.option('--root', '-r', help='Root directory for downloads and files', type=click.Path(file_okay=False),
               default=os.getcwd(), show_default=True)
 @click.option('--extras/--no-extras', default=False, help='Add extra features to the data scraped', show_default=True)
+@click.option('--verbose', '-v', default=False, help='Verbose output', show_default=True, is_flag=True)
 @click.argument('action')
-def pdpc_decision(csv, download, corpus, action, root, extras):
+def pdpc_decision(csv, download, corpus, action, root, extras, verbose):
     """
     Scripts to scrape all decisions of the Personal Data Protection Commission of Singapore.
 
@@ -37,6 +39,8 @@ def pdpc_decision(csv, download, corpus, action, root, extras):
     "files"     Downloads all the decisions from the PDPC website into a folder.
     """
     start_time = time.time()
+    if verbose:
+        logging.basicConfig(level='INFO')
     options = {"csv_path": csv, "download_folder": download, "corpus_folder": corpus, "action": action,
                "root": root, "extras": extras}
     if options['root']:

@@ -6,6 +6,7 @@ Looks over the PDPC website and creates PDPC Decision objects
 Requirements:
 * Chrome Webdriver to automate web browser
 """
+import logging
 import re
 from dataclasses import dataclass
 from datetime import datetime
@@ -21,59 +22,69 @@ def get_url(item: WebElement):
 
 
 def get_summary(item: WebElement):
-    return item.find_element_by_class_name('rte').text.replace('\n', '. ')
+    return item.find_element_by_class_name('rte').text.split('\n')[0]
 
 
 def get_published_date(item: WebElement):
-    return datetime.strptime(item.find_element_by_class_name('press__date').text, "%d %b %Y").date()
+    return datetime.strptime(item.find_element_by_class_name('page-date').text, "%d %b %Y").date()
 
 
 def get_respondent(item: WebElement):
-    link = item.find_element_by_tag_name('a')
+    link = item.find_element_by_tag_name('h2')
     text = link.text
     return re.split(r"\s+[bB]y|[Aa]gainst\s+", text, re.I)[1].strip()
 
 
 def get_title(item: WebElement):
-    return item.find_element_by_tag_name('a').text
+    return item.find_element_by_class_name('page-title').text
 
 
 class Scraper:
     def __init__(self):
         options = Options()
-        # Uncomment the next three lines for a headless chrome
         options.add_argument('--headless')
         options.add_argument('--disable-gpu')
         options.add_argument('--window-size=1920,1080')
         options.add_argument('--no-sandbox')
 
         self.driver = Chrome(options=options)
-        self.driver.implicitly_wait(5)
-
-    def refresh_pages(self):
-        group_pages = self.driver.find_element_by_class_name('group__pages')
-        return group_pages.find_elements_by_class_name('page-number')
+        self.driver.implicitly_wait(25)
 
     @classmethod
-    def scrape(cls, site_url="https://www.pdpc.gov.sg/Commissions-Decisions/Data-Protection-Enforcement-Cases"):
-        print('Starting the scrape')
+    def scrape(cls,
+               site_url="https://www.pdpc.gov.sg/All-Commissions-Decisions?"
+                        "keyword=&industry=all&nature=all&decision=all&penalty=all&page=1"):
+        logging.info('Starting the scrape')
         self = cls()
         result = []
         try:
             self.driver.get(site_url)
-            pages = self.refresh_pages()
-            for page_count in range(len(pages)):
-                pages[page_count].click()
-                print("Now at Page ", page_count)
-                pages = self.refresh_pages()
-                decisions = self.driver.find_elements_by_class_name('press-item')
-                for decision in decisions:
-                    item = PDPCDecisionItem.from_element(decision)
-                    print("Added:", item)
-                    result.append(item)
+            finished = False
+            page_count = 1
+            while not finished:
+                items = self.driver.find_element_by_class_name('listing__list').find_elements_by_tag_name('li')
+                for current_item in range(0, len(items)):
+                    items = self.driver.find_element_by_class_name('listing__list').find_elements_by_tag_name('li')
+                    from selenium.common.exceptions import NoSuchElementException
+                    try:
+                        items[current_item].click()
+                        decision = self.driver.find_element_by_class_name('detail-content')
+                        item = PDPCDecisionItem.from_element(decision)
+                        logging.info('Added: {}, {}'.format(item.respondent, item.published_date))
+                        result.append(item)
+                        self.driver.back()
+                    except NoSuchElementException:
+                        logging.warning("'detail-content' was not found: {}".format(self.driver.current_url))
+                next_page = self.driver.find_element_by_class_name('pagination-next')
+                if 'disabled' in next_page.get_attribute('class'):
+                    finished = True
+                else:
+                    page_count += 1
+                    new_url = "https://www.pdpc.gov.sg/All-Commissions-Decisions?page={}".format(page_count)
+                    self.driver.get(new_url)
         finally:
             self.driver.close()
-            print('Ending scrape.')
+        logging.info('Ending scrape.')
         return result
 
 
