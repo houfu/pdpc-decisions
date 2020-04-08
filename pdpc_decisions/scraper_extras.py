@@ -1,7 +1,7 @@
 #  MIT License Copyright (c) 2020. Houfu Ang
 import logging
 
-from download_file import check_pdf
+from pdpc_decisions.download_file import check_pdf
 
 
 def get_enforcement(items):
