@@ -1,4 +1,7 @@
 #  MIT License Copyright (c) 2020. Houfu Ang
+import logging
+
+from pdpc_decisions.download_file import check_pdf
 
 
 def get_enforcement(items):
@@ -33,7 +36,7 @@ def get_enforcement(items):
                           {'LOWER': 'issued'}]
     directions_id = 'directions'
     matcher.add(directions_id, [directions_pattern])
-    print('Adding enforcement information to items.')
+    logging.info('Adding enforcement information to items.')
     for item in items:
         doc = nlp(item.summary)
         matches = matcher(doc)
@@ -61,7 +64,7 @@ def get_enforcement(items):
 
 
 def get_decision_citation_all(items):
-    print('Adding citation information to items.')
+    logging.info('Adding citation information to items.')
     for item in items:
         get_decision_citation_one(item)
 
@@ -74,7 +77,7 @@ def get_decision_citation_one(item):
     r = requests.get(item.download_url)
     item.citation = ''
     item.case_number = ''
-    if item.download_url[-3:] == 'pdf':
+    if check_pdf(item.download_url):
         with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
             extract_text_to_fp(pdf, output_string, page_numbers=[0, 1])
             contents = output_string.getvalue()
@@ -87,7 +90,7 @@ def get_decision_citation_one(item):
 
 
 def get_case_references(items):
-    print('Adding case reference information to items.')
+    logging.info('Adding case reference information to items.')
     import spacy
     from spacy.matcher import Matcher
     from .download_file import get_text_from_pdf
@@ -109,7 +112,7 @@ def get_case_references(items):
             get_decision_citation_one(item)
         item.referred_by = []
         item.referring_to = []
-        if item.download_url[-3:] == 'pdf':
+        if check_pdf(item.download_url):
             doc = nlp(get_text_from_pdf(item))
             matches = matcher(doc)
             for match in matches:
@@ -127,9 +130,9 @@ def get_case_references(items):
 
 
 def scraper_extras(items):
-    print('Start adding extra information to items.')
+    logging.info('Start adding extra information to items.')
     get_decision_citation_all(items)
     get_enforcement(items)
     get_case_references(items)
-    print('End adding extra information to items.')
+    logging.info('End adding extra information to items.')
     return True

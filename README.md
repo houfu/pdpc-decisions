@@ -3,6 +3,7 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/houfu/pdpc-decisions)](https://github.com/houfu/pdpc-decisions)
 [![Build Status](https://travis-ci.com/houfu/pdpc-decisions.svg?branch=master)](https://travis-ci.com/houfu/pdpc-decisions)
 [![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/houfu/pdpc-decisions)](https://hub.docker.com/r/houfu/pdpc-decisions)
+[![PyPI version](https://badge.fury.io/py/pdpc-decisions.svg)](https://badge.fury.io/py/pdpc-decisions)
 
 This package contains utilities which allow you to create a corpus of decisions from the 
 Personal Data Protection Commission of Singapore's 
@@ -78,18 +79,13 @@ docker run \
 ```
 
 ### Local install
-* Clone this repository.
+* Install via PIP
 
 ```shell script
-git clone https://github.com/houfu/pdpc-decisions.git
+pip install pdpc-decisions
 ```
 
-* Install using `setup.py` (which will also install all dependencies. Except spacy's 'en-core-web-sm',
-Chrome and ChromeDriver)
-```shell script
-$ cd pdpc-decisions
-$ pip install .
-```
+* Once the package is installed, used the command line tool `pdpc-decisions` to use the script.
 
 * If necessary, install [Chrome](https://www.google.com/chrome/) 
 and [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/) for Selenium to work.

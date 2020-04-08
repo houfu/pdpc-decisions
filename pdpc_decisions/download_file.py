@@ -15,11 +15,17 @@ def download_files(options, items):
         print("Downloading a File: ", item.download_url)
         print("Date of Decision: ", item.published_date)
         print("Respondent: ", item.respondent)
-        if item.download_url[-3:] == 'pdf':
+        if check_pdf(item.download_url):
             download_pdf(options["download_folder"], item)
         else:
             download_text(options["download_folder"], item)
     print('Finished downloading files to ', options["download_folder"])
+
+
+def check_pdf(download_url: str):
+    from urllib.parse import urlparse
+    result = urlparse(download_url)
+    return result.path[-3:] == 'pdf'
 
 
 def download_pdf(download_folder, item):
@@ -43,7 +49,7 @@ def download_text(download_folder, item):
 
 
 def get_text_from_item(item):
-    if item.download_url[-3:] == 'pdf':
+    if check_pdf(item.download_url):
         return clean_up_source(get_text_from_pdf(item))
     else:
         return get_text_stream(item)
@@ -52,15 +58,17 @@ def get_text_from_item(item):
 def get_text_from_pdf(item):
     r = requests.get(item.download_url)
     from pdfminer.high_level import extract_text_to_fp
+    from pdfminer.layout import LAParams
     with io.BytesIO(r.content) as pdf, io.StringIO() as output_string, io.StringIO() as test_string:
+        params = LAParams(line_margin=2)
         extract_text_to_fp(pdf, test_string, page_numbers=[0])
         first_page = test_string.getvalue()
         if len(first_page.split()) > 100:
-            extract_text_to_fp(pdf, output_string)
+            extract_text_to_fp(pdf, output_string, laparams=params)
         else:
             from pdfminer.pdfpage import PDFPage
             pages = len([page for page in PDFPage.get_pages(pdf)])
-            extract_text_to_fp(pdf, output_string, page_numbers=[i for i in range(pages)[1:]])
+            extract_text_to_fp(pdf, output_string, page_numbers=[i for i in range(pages)[1:]], laparams=params)
         return output_string.getvalue()
 
 
