@@ -158,13 +158,17 @@ def test_download_pdf(options_test, decisions_gold, get_test_pdf_url):
     decision = decisions_gold[0]
     decision.download_url = get_test_pdf_url
     destination = ''
+    destination_2 = ''
     try:
         destination = download.download_pdf(options_test['download_folder'], decision)
-        assert destination == "{}{} {}.pdf".format(options_test['download_folder'], '2019-08-02',
-                                                   'Avant Logistic Service')
+        assert destination == f"{options_test['download_folder']}{'2019-08-02'} {'Avant Logistic Service'}.pdf"
         assert os.path.isfile(destination)
+        destination_2 = download.download_pdf(options_test['download_folder'], decision)
+        assert destination_2 == f"{options_test['download_folder']}{'2019-08-02'} {'Avant Logistic Service'} (1).pdf"
+        assert os.path.isfile(destination_2)
     finally:
         os.remove(destination)
+        os.remove(destination_2)
 
 
 def test_download_text(options_test, decisions_gold, get_test_txt_path):
@@ -243,3 +247,22 @@ def test_get_text_stream(get_test_txt_path, decisions_gold):
                 'data protection and staff training in data protection, ' \
                 'and to put all employees handling personal data through such training.'
     assert result == gold_text
+
+
+def test_download_corpus_file(options_test, decisions_gold, get_test_pdf_url):
+    if not os.path.exists(options_test["corpus_folder"]):
+        os.mkdir(options_test["corpus_folder"])
+    decision = decisions_gold[0]
+    decision.download_url = get_test_pdf_url
+    destination = ''
+    destination_2 = ''
+    try:
+        destination = download.download_corpus_file(options_test, decision)
+        assert destination == f"{options_test['corpus_folder']}{'2019-08-02'} {'Avant Logistic Service'}.txt"
+        assert os.path.isfile(destination)
+        destination_2 = download.download_corpus_file(options_test, decision)
+        assert destination_2 == f"{options_test['corpus_folder']}{'2019-08-02'} {'Avant Logistic Service'} (1).txt"
+        assert os.path.isfile(destination_2)
+    finally:
+        os.remove(destination)
+        os.remove(destination_2)
