@@ -7,7 +7,7 @@
 
 This package contains utilities which allow you to create a corpus of decisions from the 
 Personal Data Protection Commission of Singapore's 
-[Data Protection Enforcement Cases](https://www.pdpc.gov.sg/Commissions-Decisions/Data-Protection-Enforcement-Cases).
+[Data Protection Enforcement Cases](https://www.pdpc.gov.sg/Commissions-Decisions).
 
 The primary use of such a corpus is for studying, possibly using data science tools such as 
 natural language processing.
@@ -15,7 +15,7 @@ natural language processing.
 It currently has the following features:
 
 * Visit the Personal Data Protection Commission of Singapore's 
-[Data Protection Enforcement Cases](https://www.pdpc.gov.sg/Commissions-Decisions/Data-Protection-Enforcement-Cases)
+[Data Protection Enforcement Cases](https://www.pdpc.gov.sg/Commissions-Decisions)
 and compile a table of decisions with information from the summaries provided by the PDPC for each case.
 * Save this table of decisions as CSV
 * Download all the PDF files of the decisions from the PDPC's website. 
@@ -126,6 +126,8 @@ Options:
   `--extras/--no-extras`         Add extra features to the data collected. This increases processing time. This feature is ignored if action is `files` or `downloads`. 
                                 (Experimental and requires reading of actual decisions)
                                 [default: *False*, '--no-extras']
+  
+  `--verbose`               Verbose output
   
   `--help`                Show this message and exit.
 
