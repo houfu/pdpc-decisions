@@ -81,31 +81,21 @@ def get_decision_citation_one(item):
         with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
             extract_text_to_fp(pdf, output_string, page_numbers=[0, 1])
             contents = output_string.getvalue()
-        match = re.search(r'\[\d{4}]\s+(?:\d\s+)?[A-Z|()]+\s+\[?\d+\]?', contents)
-        if match:
-            item.citation = match.group()
-        match = re.search(r'DP-\w*-\w*', contents)
-        if match:
-            item.case_number = match.group()
+        summary_match = re.search(r'SUMMARY OF THE DECISION', contents)
+        if not summary_match:
+            citation_match = re.search(r'(\[\d{4}])\s+((?:\d\s+)?[A-Z|()]+)\s+\[?(\d+)\]?', contents)
+            if citation_match:
+                item.citation = citation_match.expand(r'\1 \2 \3')
+        case_match = re.search(r'DP-\w*-\w*', contents)
+        if case_match:
+            item.case_number = case_match.group()
 
 
 def get_case_references(items):
     logging.info('Adding case reference information to items.')
-    import spacy
-    from spacy.matcher import Matcher
+    import re
     from .download_file import get_text_from_pdf
-    nlp = spacy.load('en_core_web_sm')
-    matcher = Matcher(nlp.vocab)
-    citation_pattern = [{"IS_BRACKET": True},
-                        {"SHAPE": "dddd"},
-                        {"IS_BRACKET": True},
-                        {"LIKE_NUM": True, "OP": "?"},
-                        {"TEXT": {"REGEX": "^[A-Z]"}, "OP": "?"},
-                        {"ORTH": ".", "OP": "?"},
-                        {"TEXT": {"REGEX": r"^[A-Z\.]"}},
-                        {"ORTH": ".", "OP": "?"},
-                        {"LIKE_NUM": True}]
-    matcher.add('citations', [citation_pattern])
+    citation_regex = re.compile(r'(\[\d{4}])\s+((?:\d\s+)?[A-Z|()]+)\s+\[?(\d+)\]?')
     # construct referring to index
     for item in items:
         if not hasattr(item, 'citation'):
@@ -113,11 +103,10 @@ def get_case_references(items):
         item.referred_by = []
         item.referring_to = []
         if check_pdf(item.download_url):
-            doc = nlp(get_text_from_pdf(item))
-            matches = matcher(doc)
-            for match in matches:
-                _, start, end = match
-                result_citation = doc[start:end].text
+            contents = get_text_from_pdf(item)
+            citation_matches = citation_regex.finditer(contents)
+            for match in citation_matches:
+                result_citation = match.expand(r'\1 \2 \3')
                 if (item.referring_to.count(result_citation) == 0) and (result_citation != item.citation):
                     item.referring_to.append(result_citation)
     # constructed referred by index
