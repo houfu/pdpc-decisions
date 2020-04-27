@@ -31,6 +31,11 @@ def check_pdf(download_url: str):
 def download_pdf(download_folder, item):
     destination_filename = "{} {}.pdf".format(item.published_date.strftime('%Y-%m-%d'), item.respondent)
     destination = os.path.join(download_folder, destination_filename)
+    file_num = 0
+    while os.path.isfile(destination):
+        file_num += 1
+        destination_filename = f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent} ({file_num}).pdf"
+        destination = os.path.join(download_folder, destination_filename)
     with open(destination, 'wb') as file:
         pdf_file = requests.get(item.download_url).content
         file.write(pdf_file)
@@ -135,20 +140,29 @@ def clean_up_source(text):
     return '\n'.join(text_lines)
 
 
+def download_corpus_file(options, item):
+    print("Source File: ", item.download_url)
+    print("Date of Decision: ", item.published_date)
+    print("Respondent: ", item.respondent)
+    destination_filename = f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent}.txt"
+    destination = os.path.join(options["corpus_folder"], destination_filename)
+    file_num = 0
+    while os.path.isfile(destination):
+        file_num += 1
+        destination_filename = f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent} ({file_num}).txt"
+        destination = os.path.join(options["corpus_folder"], destination_filename)
+    with open(destination, 'w') as fOut:
+        text = get_text_from_item(item)
+        fOut.write(text)
+    print("Wrote: {}".format(destination))
+    return destination
+
+
 def create_corpus(options, items):
     print('Now creating corpus.')
     if not os.path.exists(options["corpus_folder"]):
         os.mkdir(options["corpus_folder"])
     for item in items:
-        print("Source File: ", item.download_url)
-        print("Date of Decision: ", item.published_date)
-        print("Respondent: ", item.respondent)
-        destination_filename = "{} {}.txt".format(item.published_date.strftime('%Y-%m-%d'),
-                                                  item.respondent)
-        destination = os.path.join(options["corpus_folder"], destination_filename)
-        with open(destination, 'w') as fOut:
-            text = get_text_from_item(item)
-            fOut.write(text)
-        print("Wrote: {}".format(destination))
+        download_corpus_file(options, item)
     print('Number of items in corpus: ', len(items))
     print('Finished creating corpus at ', options["corpus_folder"])

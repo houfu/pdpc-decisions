@@ -10,6 +10,12 @@ import pdpc_decisions.scraper as scraper
 
 
 @pytest.fixture
+def selenium(selenium):
+    selenium.implicitly_wait(25)
+    return selenium
+
+
+@pytest.fixture
 def chrome_options(chrome_options):
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-gpu')
