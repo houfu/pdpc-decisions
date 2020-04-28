@@ -1,0 +1,9 @@
+{
+  "exclusive_classes":true,
+  "labels":[
+    "NA",
+    "Remove"
+  ],
+  "pretrained_vectors":null,
+  "pretrained_dims":null
+}
