@@ -66,17 +66,17 @@ def get_enforcement(items):
 def get_decision_citation_all(items):
     logging.info('Adding citation information to items.')
     for item in items:
-        get_decision_citation_one(item)
+        item.citation, item.case_number = get_decision_citation_item(item)
 
 
-def get_decision_citation_one(item):
+def get_decision_citation_item(item):
     from pdfminer.high_level import extract_text_to_fp
     import requests
     import io
     import re
     r = requests.get(item.download_url)
-    item.citation = ''
-    item.case_number = ''
+    citation = ''
+    case_number = ''
     if check_pdf(item.download_url):
         with io.BytesIO(r.content) as pdf, io.StringIO() as output_string:
             extract_text_to_fp(pdf, output_string, page_numbers=[0, 1])
@@ -85,43 +85,52 @@ def get_decision_citation_one(item):
         if not summary_match:
             citation_match = re.search(r'(\[\d{4}])\s+((?:\d\s+)?[A-Z|()]+)\s+\[?(\d+)\]?', contents)
             if citation_match:
-                item.citation = citation_match.expand(r'\1 \2 \3')
+                citation = citation_match.expand(r'\1 \2 \3')
         case_match = re.search(r'DP-\w*-\w*', contents)
         if case_match:
-            item.case_number = case_match.group()
+            case_number = case_match.group()
+    return citation, case_number
 
 
-def get_case_references(items):
+def get_case_references_all(items):
     logging.info('Adding case reference information to items.')
-    import re
-    from .download_file import get_text_from_pdf
-    citation_regex = re.compile(r'(\[\d{4}])\s+((?:\d\s+)?[A-Z|()]+)\s+\[?(\d+)\]?')
     # construct referring to index
     for item in items:
-        if not hasattr(item, 'citation'):
-            get_decision_citation_one(item)
-        item.referred_by = []
-        item.referring_to = []
-        if check_pdf(item.download_url):
-            contents = get_text_from_pdf(item)
-            citation_matches = citation_regex.finditer(contents)
-            for match in citation_matches:
-                result_citation = match.expand(r'\1 \2 \3')
-                if (item.referring_to.count(result_citation) == 0) and (result_citation != item.citation):
-                    item.referring_to.append(result_citation)
-    # constructed referred by index
-    for item in items:
-        for reference in item.referring_to:
-            result_item = next((x for x in items if x.citation == reference), None)
-            if result_item:
-                if result_item.referred_by.count(item.citation) == 0:
-                    result_item.referred_by.append(item.citation)
+        item.referring_to = get_referring_to_item(item)
+        add_referred_by_to_item(item, items)
+
+
+def add_referred_by_to_item(item, items):
+    citation, _ = get_decision_citation_item(item)
+    for reference in item.referring_to:
+        result_item = next((x for x in items if x.citation == reference), None)
+        if result_item:
+            if not hasattr(result_item, 'referred_by'):
+                result_item.referred_by = [citation]
+            if result_item.referred_by.count(citation) == 0:
+                result_item.referred_by.append(citation)
+
+
+def get_referring_to_item(item):
+    citation, _ = get_decision_citation_item(item)
+    referring_to = []
+    if check_pdf(item.download_url):
+        from .download_file import get_text_from_pdf
+        contents = get_text_from_pdf(item)
+        import re
+        citation_regex = re.compile(r'(\[\d{4}])\s+((?:\d\s+)?[A-Z|()]+)\s+\[?(\d+)\]?')
+        citation_matches = citation_regex.finditer(contents)
+        for match in citation_matches:
+            result_citation = match.expand(r'\1 \2 \3')
+            if (referring_to.count(result_citation) == 0) and (result_citation != citation):
+                referring_to.append(result_citation)
+    return referring_to
 
 
 def scraper_extras(items):
     logging.info('Start adding extra information to items.')
     get_decision_citation_all(items)
     get_enforcement(items)
-    get_case_references(items)
+    get_case_references_all(items)
     logging.info('End adding extra information to items.')
     return True

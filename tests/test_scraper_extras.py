@@ -40,13 +40,14 @@ def test_get_case_references(requests_mock):
         bytes = html.read()
     requests_mock.get('mock://test/get_test_pdf_url.pdf', content=bytes)
 
-    extras.get_case_references(decisions)
+    extras.get_decision_citation_all(decisions)
+    extras.get_case_references_all(decisions)
     assert decisions[0].referring_to == ['[2020] SGPDPC 3', '[2019] SGPDPC 1', '[2016] SGPDPC 5']
-    assert decisions[0].referred_by == []
+    assert not hasattr(decisions[0], 'referred_by')
     assert decisions[1].referring_to == []
     assert decisions[1].referred_by == ['[2020] SGPDPC 1']
     assert decisions[2].referring_to == []
-    assert decisions[2].referred_by == []
+    assert not hasattr(decisions[2], 'referred_by')
 
 
 def test_scraper_extras(decisions_gold):
