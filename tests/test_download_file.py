@@ -266,3 +266,4 @@ def test_download_corpus_file(options_test, decisions_gold, get_test_pdf_url):
     finally:
         os.remove(destination)
         os.remove(destination_2)
+        os.rmdir(options_test["corpus_folder"])
