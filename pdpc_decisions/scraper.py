@@ -67,7 +67,8 @@ class Scraper:
                     items = self.driver.find_element_by_class_name('listing__list').find_elements_by_tag_name('li')
                     from selenium.common.exceptions import NoSuchElementException
                     try:
-                        items[current_item].click()
+                        link = items[current_item].find_element_by_tag_name('a').get_property('href')
+                        self.driver.get(link)
                         decision = self.driver.find_element_by_class_name('detail-content')
                         item = PDPCDecisionItem.from_element(decision)
                         logging.info('Added: {}, {}'.format(item.respondent, item.published_date))
