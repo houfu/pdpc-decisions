@@ -25,7 +25,7 @@ def chrome_options(chrome_options):
 
 
 @pytest.fixture()
-def decisions_test_items(selenium):
+def decisions_test_items():
     test_items_url = [
         Path(os.getcwd() + '/tests/test_items/test_1.html').as_uri(),
         Path(os.getcwd() + '/tests/test_items/test_2.html').as_uri(),

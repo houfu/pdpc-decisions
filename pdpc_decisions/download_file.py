@@ -6,7 +6,7 @@ import re
 
 import requests
 
-from scraper import PDPCDecisionItem
+from .scraper import PDPCDecisionItem
 
 
 def download_files(options, items):
