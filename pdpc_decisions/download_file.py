@@ -6,6 +6,8 @@ import re
 
 import requests
 
+from scraper import PDPCDecisionItem
+
 
 def download_files(options, items):
     print('Start downloading files.')
@@ -22,7 +24,8 @@ def download_files(options, items):
     print('Finished downloading files to ', options["download_folder"])
 
 
-def check_pdf(download_url: str):
+def check_pdf(download_url: str) -> bool:
+    """Check if the download_url is a PDF or not by reading the extension."""
     from urllib.parse import urlparse
     result = urlparse(download_url)
     return result.path[-3:] == 'pdf'
@@ -53,15 +56,21 @@ def download_text(download_folder, item):
     return destination
 
 
-def get_text_from_item(item):
-    if check_pdf(item.download_url):
-        return clean_up_source(get_text_from_pdf(item))
+def get_text_from_item(source: PDPCDecisionItem) -> str:
+    """Gets the text of the decision from the source item."""
+    if check_pdf(source.download_url):
+        return clean_up_source(get_text_from_pdf(source))
     else:
-        return get_text_stream(item)
+        return get_text_stream(source)
 
 
-def get_text_from_pdf(item):
-    r = requests.get(item.download_url)
+def get_text_from_pdf(source: PDPCDecisionItem) -> str:
+    """
+    Gets text from the decision of source in PDF. Avoids the first page if it is a cover page.
+    :param source:
+    :return:
+    """
+    r = requests.get(source.download_url)
     from pdfminer.high_level import extract_text_to_fp
     from pdfminer.layout import LAParams
     with io.BytesIO(r.content) as pdf, io.StringIO() as output_string, io.StringIO() as test_string:
