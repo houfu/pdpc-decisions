@@ -10,33 +10,65 @@ import logging
 import re
 from dataclasses import dataclass
 from datetime import datetime
+from typing import List
 
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
 
 
-def get_url(item: WebElement):
+def get_url(item: WebElement) -> str:
+    """Gets the URL for the text of the decision."""
     link = item.find_element_by_tag_name('a')
     return link.get_property('href')
 
 
-def get_summary(item: WebElement):
+def get_summary(item: WebElement) -> str:
+    """Gets the summary of a decision as provided by the PDPC."""
     return item.find_element_by_class_name('rte').text.split('\n')[0]
 
 
-def get_published_date(item: WebElement):
+def get_published_date(item: WebElement) -> datetime.date:
+    """Gets the date when the decision is published on the PDPC Website"""
     return datetime.strptime(item.find_element_by_class_name('page-date').text, "%d %b %Y").date()
 
 
-def get_respondent(item: WebElement):
+def get_respondent(item: WebElement) -> str:
+    """Gets the name of the respondent in the decision from title of the decision."""
     link = item.find_element_by_tag_name('h2')
     text = link.text
     return re.split(r"\s+[bB]y|[Aa]gainst\s+", text, re.I)[1].strip()
 
 
-def get_title(item: WebElement):
+def get_title(item: WebElement) -> str:
+    """Gets the title of the decision as provided by the PDPC"""
     return item.find_element_by_class_name('page-title').text
+
+
+@dataclass
+class PDPCDecisionItem:
+    published_date: datetime.date
+    respondent: str
+    title: str
+    summary: str
+    download_url: str
+
+    @classmethod
+    def from_element(cls, decision: WebElement):
+        """
+        Create a PDPCDecisionItem from a section in the PDPC Website's list of commission's decisions.
+        :param decision:
+        :return:
+        """
+        published_date = get_published_date(decision)
+        respondent = get_respondent(decision)
+        title = get_title(decision)
+        summary = get_summary(decision)
+        download_url = get_url(decision)
+        return cls(published_date, respondent, title, summary, download_url)
+
+    def __str__(self):
+        return "PDPCDecision object: {} {}".format(self.published_date, self.respondent)
 
 
 class Scraper:
@@ -53,7 +85,8 @@ class Scraper:
     @classmethod
     def scrape(cls,
                site_url="https://www.pdpc.gov.sg/All-Commissions-Decisions?"
-                        "keyword=&industry=all&nature=all&decision=all&penalty=all&page=1"):
+                        "keyword=&industry=all&nature=all&decision=all&penalty=all&page=1") -> List[PDPCDecisionItem]:
+        """Convenience method for scraping the PDPC Decision website with Scraper."""
         logging.info('Starting the scrape')
         self = cls()
         result = []
@@ -87,24 +120,3 @@ class Scraper:
             self.driver.close()
         logging.info('Ending scrape.')
         return result
-
-
-@dataclass
-class PDPCDecisionItem:
-    published_date: datetime.date
-    respondent: str
-    title: str
-    summary: str
-    download_url: str
-
-    @classmethod
-    def from_element(cls, decision: WebElement):
-        published_date = get_published_date(decision)
-        respondent = get_respondent(decision)
-        title = get_title(decision)
-        summary = get_summary(decision)
-        download_url = get_url(decision)
-        return cls(published_date, respondent, title, summary, download_url)
-
-    def __str__(self):
-        return "PDPCDecision object: {} {}".format(self.published_date, self.respondent)
