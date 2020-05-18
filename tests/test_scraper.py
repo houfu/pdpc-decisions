@@ -88,4 +88,4 @@ def test_scraper_scrape(get_test_page_url, mocker):
 
 
 def test_pdpcdecision_item_str(decisions_test_items):
-    assert print(decisions_test_items[0]) == "PDPCDecision object: 2016-04-21 Institution of Engineers, Singapore"
+    assert str(decisions_test_items[1][0]) == "PDPCDecision object: 2016-04-21 Institution of Engineers, Singapore"
