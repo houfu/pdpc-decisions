@@ -84,8 +84,8 @@ def test_scraper_init():
 
 @pytest.mark.skip('Change in site structure rendered this inapplicable')
 def test_scraper_scrape(get_test_page_url, mocker):
-    from pdpc_decisions.scraper import Scraper
-    scraper_test = Scraper()
-    result = scraper_test.scrape(
-        site_url=get_test_page_url)
-    assert len(result) == len(decisions_gold) * 26
+    pass
+
+
+def test_pdpcdecision_item_str(decisions_test_items):
+    assert str(decisions_test_items[1][0]) == "PDPCDecision object: 2016-04-21 Institution of Engineers, Singapore"
