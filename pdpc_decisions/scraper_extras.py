@@ -139,6 +139,8 @@ def add_referred_by_to_item(source: PDPCDecisionItem, target: List[PDPCDecisionI
     """
     if not hasattr(source, 'referring_to'):
         return
+    if citation == '':
+        citation = f'title#{source.title}'
     for reference in source.referring_to:
         result_item = next((x for x in target if x.citation == reference), None)
         if result_item:
