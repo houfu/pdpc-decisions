@@ -3,7 +3,7 @@ import logging
 from typing import List
 
 from pdpc_decisions.download_file import check_pdf
-from .scraper import PDPCDecisionItem
+from pdpc_decisions.scraper import PDPCDecisionItem
 
 
 def get_enforcement(items: List[PDPCDecisionItem]) -> None:
