@@ -106,9 +106,9 @@ def get_decision_citation_item(source: PDPCDecisionItem) -> (str, str):
             citation_match = re.search(r'(\[\d{4}])\s+((?:\d\s+)?[A-Z|()]+)\s+\[?(\d+)\]?', contents)
             if citation_match:
                 citation = citation_match.expand(r'\1 \2 \3')
-        case_match = re.search(r'DP-\w*-\w*', contents)
+        case_match = re.search(r'DP-\s*(\w*)-\s*(\w*)', contents)
         if case_match:
-            case_number = case_match.group()
+            case_number = case_match.expand(r'DP-\1-\2')
     return citation, case_number
 
 
