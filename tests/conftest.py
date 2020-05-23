@@ -25,7 +25,7 @@ def chrome_options(chrome_options):
 
 
 @pytest.fixture()
-def decisions_test_items():
+def decisions_test_items(requests_mock):
     test_items_url = [
         Path(os.getcwd() + '/tests/test_items/test_1.html').as_uri(),
         Path(os.getcwd() + '/tests/test_items/test_2.html').as_uri(),
@@ -33,6 +33,11 @@ def decisions_test_items():
         Path(os.getcwd() + '/tests/test_items/test_4.html').as_uri(),
         Path(os.getcwd() + '/tests/test_items/test_5.html').as_uri(),
     ]
+    requests_mock.get(test_items_url[0], text=open('tests/test_items/test_1.html').read())
+    requests_mock.get(test_items_url[1], text=open('tests/test_items/test_2.html').read())
+    requests_mock.get(test_items_url[2], text=open('tests/test_items/test_3.html').read())
+    requests_mock.get(test_items_url[3], text=open('tests/test_items/test_4.html').read())
+    requests_mock.get(test_items_url[4], text=open('tests/test_items/test_5.html').read())
     test_decision_gold_dict = [
         {'published_date': datetime.date(2016, 4, 21), 'respondent': 'Institution of Engineers, Singapore',
          'title': 'Breach of Protection Obligation by Institution of Engineers, Singapore',
