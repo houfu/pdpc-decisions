@@ -16,6 +16,8 @@ from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
 
+logger = logging.getLogger(__name__)
+
 
 def get_url(item: WebElement) -> str:
     """Gets the URL for the text of the decision."""
@@ -68,7 +70,7 @@ class PDPCDecisionItem:
         return cls(published_date, respondent, title, summary, download_url)
 
     def __str__(self):
-        return "PDPCDecision object: {} {}".format(self.published_date, self.respondent)
+        return f"PDPCDecisionItem: {self.respondent} {self.published_date}"
 
 
 class Scraper:
@@ -87,13 +89,14 @@ class Scraper:
                site_url="https://www.pdpc.gov.sg/All-Commissions-Decisions?"
                         "keyword=&industry=all&nature=all&decision=all&penalty=all&page=1") -> List[PDPCDecisionItem]:
         """Convenience method for scraping the PDPC Decision website with Scraper."""
-        logging.info('Starting the scrape')
+        logger.info('Starting the scrape')
         self = cls()
         result = []
         try:
             self.driver.get(site_url)
             finished = False
             page_count = 1
+            logger.info('Now at page 1.')
             while not finished:
                 items = self.driver.find_element_by_class_name('listing__list').find_elements_by_tag_name('li')
                 for current_item in range(0, len(items)):
@@ -104,19 +107,21 @@ class Scraper:
                         self.driver.get(link)
                         decision = self.driver.find_element_by_class_name('detail-content')
                         item = PDPCDecisionItem.from_element(decision)
-                        logging.info('Added: {}, {}'.format(item.respondent, item.published_date))
+                        logger.info(f'Added: {item.respondent}, {item.published_date}')
                         result.append(item)
                         self.driver.back()
                     except NoSuchElementException:
-                        logging.warning("'detail-content' was not found: {}".format(self.driver.current_url))
+                        logger.warning("'detail-content' was not found: {}".format(self.driver.current_url))
                 next_page = self.driver.find_element_by_class_name('pagination-next')
                 if 'disabled' in next_page.get_attribute('class'):
+                    logger.info('Scraper has reached end of page.')
                     finished = True
                 else:
                     page_count += 1
                     new_url = "https://www.pdpc.gov.sg/All-Commissions-Decisions?page={}".format(page_count)
                     self.driver.get(new_url)
+                    logger.info(f'Now at page {page_count}')
         finally:
             self.driver.close()
-        logging.info('Ending scrape.')
+        logger.info(f'Ending scrape with {len(result)} items.')
         return result

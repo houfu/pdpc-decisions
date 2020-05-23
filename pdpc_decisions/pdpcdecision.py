@@ -11,6 +11,8 @@ from pdpc_decisions.save_file import save_scrape_results_to_csv
 from pdpc_decisions.scraper import Scraper
 from pdpc_decisions.scraper_extras import scraper_extras
 
+logger = logging.getLogger(__name__)
+
 
 @click.command()
 @click.option('--csv', help='Filename for saving the items gathered by scraper as a csv file.',
@@ -43,6 +45,7 @@ def pdpc_decision(csv, download, corpus, action, root, extras, verbose):
         logging.basicConfig(level='INFO')
     options = {"csv_path": csv, "download_folder": download, "corpus_folder": corpus, "action": action,
                "root": root, "extras": extras}
+    logger.info(f'Options: {options}')
     if options['root']:
         os.chdir(root)
     scrape_results = Scraper.scrape()
@@ -59,7 +62,7 @@ def pdpc_decision(csv, download, corpus, action, root, extras, verbose):
     if action == 'corpus':
         create_corpus(options, scrape_results)
     diff = time.time() - start_time
-    print('Finished. This took {}s.'.format(diff))
+    logger.info('Finished. This took {}s.'.format(diff))
 
 
 if __name__ == '__main__':

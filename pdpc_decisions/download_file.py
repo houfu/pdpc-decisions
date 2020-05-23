@@ -1,6 +1,7 @@
 #  MIT License Copyright (c) 2020. Houfu Ang
 
 import io
+import logging
 import os
 import re
 
@@ -8,20 +9,20 @@ import requests
 
 from pdpc_decisions.scraper import PDPCDecisionItem
 
+logger = logging.getLogger(__name__)
+
 
 def download_files(options, items):
-    print('Start downloading files.')
+    logger.info('Start downloading files.')
     if not os.path.exists(options["download_folder"]):
         os.mkdir(options["download_folder"])
     for item in items:
-        print("Downloading a File: ", item.download_url)
-        print("Date of Decision: ", item.published_date)
-        print("Respondent: ", item.respondent)
+        logger.info(f"Downloading {item}: {item.download_url}")
         if check_pdf(item.download_url):
             download_pdf(options["download_folder"], item)
         else:
             download_text(options["download_folder"], item)
-    print('Finished downloading files to ', options["download_folder"])
+    logger.info(f'Finished downloading files to {options["download_folder"]}')
 
 
 def check_pdf(download_url: str) -> bool:
@@ -42,7 +43,7 @@ def download_pdf(download_folder, item):
     with open(destination, 'wb') as file:
         pdf_file = requests.get(item.download_url).content
         file.write(pdf_file)
-    print("Downloaded a pdf: ", destination)
+    logger.info(f"Downloaded a pdf: {destination}")
     return destination
 
 
@@ -52,7 +53,7 @@ def download_text(download_folder, item):
     destination = os.path.join(download_folder, destination_filename)
     with open(destination, "w", encoding='utf-8') as f:
         f.writelines(get_text_stream(item))
-    print("Downloaded a text: ", destination)
+    logger.info(f"Downloaded a text: {destination}")
     return destination
 
 
