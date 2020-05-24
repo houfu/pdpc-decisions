@@ -65,7 +65,7 @@ class PDPCDecisionItem:
     def from_web_page(cls, decision: str):
         """
         Create a PDPCDecisionItem from a section in the PDPC Website's list of commission's decisions.
-        :param decision:
+        :param decision: Link to PDPC's decision page.
         :return:
         """
         soup = BeautifulSoup(requests.get(decision).text, features='html5lib')

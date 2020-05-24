@@ -2,11 +2,15 @@
 
 import csv
 import logging
+from typing import List
+
+from pdpc_decisions.pdpcdecision import Options
+from pdpc_decisions.scraper import PDPCDecisionItem
 
 logger = logging.getLogger(__name__)
 
 
-def save_scrape_results_to_csv(options, scrape_results):
+def save_scrape_results_to_csv(options: Options, scrape_results: List[PDPCDecisionItem]) -> None:
     logger.info('Saving scrape results as a csv file.')
     with open(options["csv_path"], 'w', newline='', encoding='utf-8') as f:
         csvwriter = csv.writer(f)

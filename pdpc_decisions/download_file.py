@@ -4,15 +4,17 @@ import io
 import logging
 import os
 import re
+from typing import Iterable
 
 import requests
 
+from pdpc_decisions.pdpcdecision import Options
 from pdpc_decisions.scraper import PDPCDecisionItem
 
 logger = logging.getLogger(__name__)
 
 
-def download_files(options, items):
+def download_files(options: Options, items: Iterable[PDPCDecisionItem]):
     logger.info('Start downloading files.')
     if not os.path.exists(options["download_folder"]):
         os.mkdir(options["download_folder"])
@@ -32,7 +34,8 @@ def check_pdf(download_url: str) -> bool:
     return result.path[-3:] == 'pdf'
 
 
-def download_pdf(download_folder, item):
+def download_pdf(download_folder: str, item: PDPCDecisionItem) -> str:
+    """Downloads a pdf in the item to the download folder. Returns the path where the file is saved."""
     destination_filename = "{} {}.pdf".format(item.published_date.strftime('%Y-%m-%d'), item.respondent)
     destination = os.path.join(download_folder, destination_filename)
     file_num = 0
@@ -47,7 +50,8 @@ def download_pdf(download_folder, item):
     return destination
 
 
-def download_text(download_folder, item):
+def download_text(download_folder: str, item: PDPCDecisionItem) -> str:
+    """Downloads a text file in the item to the download folder. Returns the path where the file is saved."""
     destination_filename = "{} {}.txt".format(item.published_date.strftime('%Y-%m-%d'),
                                               item.respondent)
     destination = os.path.join(download_folder, destination_filename)
