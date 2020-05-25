@@ -7,78 +7,14 @@ Requirements:
 * Chrome Webdriver to automate web browser
 """
 import logging
-import re
-from dataclasses import dataclass
-from datetime import datetime
 from typing import List
-from urllib.parse import urljoin
 
-import requests
-from bs4 import BeautifulSoup, Tag
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
+from pdpc_decisions.classes import PDPCDecisionItem
+
 logger = logging.getLogger(__name__)
-
-
-def get_url(article: Tag, url: str) -> str:
-    """Gets the URL for the text of the decision."""
-    link = article.find('a')
-    return urljoin(url, link['href'])
-
-
-def get_summary(article: Tag) -> str:
-    """Gets the summary of a decision as provided by the PDPC."""
-    paragraphs = article.find(class_='rte').find_all('p')
-    result = ''
-    for paragraph in paragraphs:
-        if not paragraph.text == '':
-            result += paragraph.text
-            break
-    return result
-
-
-def get_published_date(article: Tag) -> datetime.date:
-    """Gets the date when the decision is published on the PDPC Website"""
-    return datetime.strptime(article.find(class_='page-date').text, "%d %b %Y").date()
-
-
-def get_respondent(article: Tag) -> str:
-    """Gets the name of the respondent in the decision from title of the decision."""
-    return re.split(r"\s+[bB]y|[Aa]gainst\s+", article.find('h2').text, re.I)[1].strip()
-
-
-def get_title(article: Tag) -> str:
-    """Gets the title of the decision as provided by the PDPC"""
-    return article.find('h2').text
-
-
-@dataclass
-class PDPCDecisionItem:
-    published_date: datetime.date
-    respondent: str
-    title: str
-    summary: str
-    download_url: str
-
-    @classmethod
-    def from_web_page(cls, decision: str):
-        """
-        Create a PDPCDecisionItem from a section in the PDPC Website's list of commission's decisions.
-        :param decision: Link to PDPC's decision page.
-        :return:
-        """
-        soup = BeautifulSoup(requests.get(decision).text, features='html5lib')
-        article = soup.find('article')
-        published_date = get_published_date(article)
-        respondent = get_respondent(article)
-        title = get_title(article)
-        summary = get_summary(article)
-        download_url = get_url(article, decision)
-        return cls(published_date, respondent, title, summary, download_url)
-
-    def __str__(self):
-        return f"PDPCDecisionItem: {self.published_date} {self.respondent}"
 
 
 class Scraper:

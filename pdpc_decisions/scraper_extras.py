@@ -2,8 +2,8 @@
 import logging
 from typing import List
 
+from pdpc_decisions.classes import PDPCDecisionItem
 from pdpc_decisions.download_file import check_pdf
-from pdpc_decisions.scraper import PDPCDecisionItem
 
 logger = logging.getLogger(__name__)
 

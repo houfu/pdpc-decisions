@@ -3,10 +3,10 @@
 import logging
 import os
 import time
-from typing import TypedDict
 
 import click
 
+from pdpc_decisions.classes import Options
 from pdpc_decisions.download_file import download_files, create_corpus
 from pdpc_decisions.save_file import save_scrape_results_to_csv
 from pdpc_decisions.scraper import Scraper
@@ -64,15 +64,6 @@ def pdpc_decision(csv, download, corpus, action, root, extras, verbose):
         create_corpus(options, scrape_results)
     diff = time.time() - start_time
     logger.info('Finished. This took {}s.'.format(diff))
-
-
-class Options(TypedDict):
-    csv_path: str
-    download_folder: str
-    corpus_folder: str
-    action: str
-    root: str
-    extras: bool
 
 
 if __name__ == '__main__':

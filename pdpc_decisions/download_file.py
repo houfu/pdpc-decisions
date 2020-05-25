@@ -8,8 +8,7 @@ from typing import Iterable
 
 import requests
 
-from pdpc_decisions.pdpcdecision import Options
-from pdpc_decisions.scraper import PDPCDecisionItem
+from pdpc_decisions.classes import Options, PDPCDecisionItem
 
 logger = logging.getLogger(__name__)
 

@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "pdpc-decisions"
+version = "1.2.2"
+description = "Utilities to create a corpus of decisions from the Personal Data Protection Commission of Singapore's Data Protection Enforcement Cases."
+authors = ["Ang Houfu <damon.houf@gmail.com>"]
+license = "MIT License"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+selenium = "^3.141.0"
+Click = "^7.1.2"
+html5lib = "^1.0.1"
+"pdfminer.six" = "^20200517"
+en-core-web-sm = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz"}
+requests = "^2.23.0"
+spacy = "^2.2.4"
+beautifulsoup4 = "^4.9.1"
+
+[tool.poetry.dev-dependencies]
+requests-mock = "^1.8.0"
+pytest-mock = "^3.1.0"
+pytest-cov = "^2.9.0"
+pytest-sugar = "^0.9.3"
+pytest-selenium = "^1.17.0"
+pytest = "^5.4.2"
+coverage = "^5.1"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
