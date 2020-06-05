@@ -35,13 +35,27 @@ def check_pdf(download_url: str) -> bool:
 
 def download_pdf(download_folder: str, item: PDPCDecisionItem) -> str:
     """Downloads a pdf in the item to the download folder. Returns the path where the file is saved."""
-    destination_filename = "{} {}.pdf".format(item.published_date.strftime('%Y-%m-%d'), item.respondent)
-    destination = os.path.join(download_folder, destination_filename)
-    file_num = 0
-    while os.path.isfile(destination):
+    destination = os.path.join(download_folder,
+                               f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent}.pdf")
+    if os.path.isfile(os.path.join(download_folder,
+                                   f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent} (1).pdf")):
+        logger.warning('Will use secondary format for PDF files. Most likely two decisions with the same name.')
+        file_num = 2
+        destination = os.path.join(download_folder,
+                                   f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent} ({file_num}).pdf")
+        while os.path.isfile(destination):
+            file_num += 1
+            destination = os.path.join(download_folder,
+                                       f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent} ({file_num}).pdf")
+    if os.path.isfile(destination):
+        logger.warning('Found two decisions with the same PDF output file name. Rewriting to secondary format.')
+        file_num = 1
+        os.rename(destination,
+                  os.path.join(download_folder,
+                               f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent} ({file_num}).pdf"))
         file_num += 1
-        destination_filename = f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent} ({file_num}).pdf"
-        destination = os.path.join(download_folder, destination_filename)
+        destination = os.path.join(download_folder,
+                                   f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent} ({file_num}).pdf")
     with open(destination, 'wb') as file:
         pdf_file = requests.get(item.download_url).content
         file.write(pdf_file)

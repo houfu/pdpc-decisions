@@ -61,6 +61,7 @@ def pdpc_decision(csv, download, corpus, action, root, extras, verbose):
     if action == 'files':
         download_files(options, scrape_results)
     if action == 'corpus':
+        download_files(options, scrape_results)
         create_corpus(options, scrape_results)
     diff = time.time() - start_time
     logger.info('Finished. This took {}s.'.format(diff))
