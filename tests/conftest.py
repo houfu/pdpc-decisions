@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-import pdpc_decisions.scraper as scraper
+from pdpc_decisions.classes import PDPCDecisionItem
 
 
 @pytest.fixture
@@ -27,17 +27,17 @@ def chrome_options(chrome_options):
 @pytest.fixture()
 def decisions_test_items(requests_mock):
     test_items_url = [
-        Path(os.getcwd() + '/tests/test_items/test_1.html').as_uri(),
-        Path(os.getcwd() + '/tests/test_items/test_2.html').as_uri(),
-        Path(os.getcwd() + '/tests/test_items/test_3.html').as_uri(),
-        Path(os.getcwd() + '/tests/test_items/test_4.html').as_uri(),
-        Path(os.getcwd() + '/tests/test_items/test_5.html').as_uri(),
+        Path(os.getcwd() + '/tests/decisions_test_items/test_1.html').as_uri(),
+        Path(os.getcwd() + '/tests/decisions_test_items/test_2.html').as_uri(),
+        Path(os.getcwd() + '/tests/decisions_test_items/test_3.html').as_uri(),
+        Path(os.getcwd() + '/tests/decisions_test_items/test_4.html').as_uri(),
+        Path(os.getcwd() + '/tests/decisions_test_items/test_5.html').as_uri(),
     ]
-    requests_mock.get(test_items_url[0], text=open('tests/test_items/test_1.html').read())
-    requests_mock.get(test_items_url[1], text=open('tests/test_items/test_2.html').read())
-    requests_mock.get(test_items_url[2], text=open('tests/test_items/test_3.html').read())
-    requests_mock.get(test_items_url[3], text=open('tests/test_items/test_4.html').read())
-    requests_mock.get(test_items_url[4], text=open('tests/test_items/test_5.html').read())
+    requests_mock.get(test_items_url[0], text=open('tests/decisions_test_items/test_1.html').read())
+    requests_mock.get(test_items_url[1], text=open('tests/decisions_test_items/test_2.html').read())
+    requests_mock.get(test_items_url[2], text=open('tests/decisions_test_items/test_3.html').read())
+    requests_mock.get(test_items_url[3], text=open('tests/decisions_test_items/test_4.html').read())
+    requests_mock.get(test_items_url[4], text=open('tests/decisions_test_items/test_5.html').read())
     test_decision_gold_dict = [
         {'published_date': datetime.date(2016, 4, 21), 'respondent': 'Institution of Engineers, Singapore',
          'title': 'Breach of Protection Obligation by Institution of Engineers, Singapore',
@@ -81,7 +81,7 @@ def decisions_test_items(requests_mock):
          'download_url': 'file:///-/media/Files/PDPC/PDF-Files/Commissions-Decisions/Decision---SPH-Magazines-Pte-Ltd'
                          '.pdf'}
     ]
-    test_decision_gold = [scraper.PDPCDecisionItem(**dictionary) for dictionary in test_decision_gold_dict]
+    test_decision_gold = [PDPCDecisionItem(**dictionary) for dictionary in test_decision_gold_dict]
     return test_items_url, test_decision_gold
 
 
@@ -95,81 +95,71 @@ def decisions_gold(requests_mock):
         text = html.read()
     requests_mock.get('mock://test/get_test_txt_path', text=text)
     return [
-        scraper.PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Avant Logistic Service',
-                                 download_url='mock://test/get_test_pdf_url.pdf',
-                                 title='Breach of the Protection Obligation by Avant Logistic Service',
-                                 summary="Breach of the Protection Obligation by Avant Logistic Service. "
-                                         "Directions were issued to Avant Logistic Service for failing to "
-                                         "make reasonable security arrangements to prevent the unauthorised "
-                                         "disclosure of customers' personal data. The lapses resulted in "
-                                         "personal data of customers being disclosed by an employee."),
-        scraper.PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Horizon Fast Ferry',
-                                 download_url='mock://test/get_test_txt_path',
-                                 title='Breach of the Protection Obligation by Horizon Fast Ferry',
-                                 summary="Breach of the Protection Obligation by Horizon Fast Ferry. "
-                                         "A financial penalty of $54,000 was imposed on Horizon Fast Ferry for "
-                                         "failing to appoint a data protection officer, develop and implement "
-                                         "data protection policies and practices, and put in place reasonable "
-                                         "security arrangements to protect the personal data collected "
-                                         "from its customers."),
-        scraper.PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Genki Sushi',
-                                 download_url='mock://test/get_test_pdf_url.pdf',
-                                 title='Breach of the Protection Obligation by Genki Sushi',
-                                 summary="Breach of the Protection Obligation by Genki Sushi. "
-                                         "A financial penalty of $16,000 was imposed on Genki Sushi for failing "
-                                         "to put in place reasonable security arrangements to protect personal data "
-                                         "of its employees. The incident resulted in the data being subjected to "
-                                         "a ransomware attack."),
-        scraper.PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Championtutor',
-                                 download_url='mock://test/get_test_pdf_url.pdf',
-                                 title='Breach of the Openness Obligation by Championtutor',
-                                 summary="Breach of the Openness Obligation by Championtutor. "
-                                         "Directions, including a financial penalty of $5,000, were imposed on "
-                                         "Championtutor for breaches of the PDPA. The organisation failed to "
-                                         "appoint a data protection officer and did not have written policies and "
-                                         "practices necessary to ensure its compliance with  the PDPA."),
-        scraper.PDPCDecisionItem(published_date=datetime.date(2019, 8, 2),
-                                 respondent='CDP and Toppan Security Printing',
-                                 download_url='mock://test/get_test_pdf_url.pdf',
-                                 title='Breach of the Protection Obligation by CDP and Toppan Security Printing',
-                                 summary="Breach of the Protection Obligation by CDP and Toppan Security Printing. "
-                                         "A financial penalty of $24,000 and $12,000 was imposed on CDP and "
-                                         "Toppan Security Printing respectively for failing to put in place "
-                                         "reasonable security arrangements to protect the data of CDP’s account "
-                                         "holders from unauthorised disclosure. The incident resulted in other "
-                                         "account holders’ data being printed on another account holder’s "
-                                         "notification letter. An application for reconsideration was made by "
-                                         "Toppan Security Printing. Upon reconsideration, "
-                                         "directions in the decision were varied. ")
+        PDPCDecisionItem(published_date=datetime.date(2019, 8, 2),
+                         respondent='Avant Logistic Service',
+                         download_url='mock://test/get_test_pdf_url.pdf',
+                         title='Breach of the Protection Obligation by Avant Logistic Service',
+                         summary="Breach of the Protection Obligation by Avant Logistic Service. "
+                                 "Directions were issued to Avant Logistic Service for failing to "
+                                 "make reasonable security arrangements to prevent the unauthorised "
+                                 "disclosure of customers' personal data. The lapses resulted in "
+                                 "personal data of customers being disclosed by an employee."),
+        PDPCDecisionItem(published_date=datetime.date(2019, 8, 2),
+                         respondent='Horizon Fast Ferry',
+                         download_url='mock://test/get_test_txt_path',
+                         title='Breach of the Protection Obligation by Horizon Fast Ferry',
+                         summary="Breach of the Protection Obligation by Horizon Fast Ferry. "
+                                 "A financial penalty of $54,000 was imposed on Horizon Fast Ferry for "
+                                 "failing to appoint a data protection officer, develop and implement "
+                                 "data protection policies and practices, and put in place reasonable "
+                                 "security arrangements to protect the personal data collected "
+                                 "from its customers."),
+        PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Genki Sushi',
+                         download_url='mock://test/get_test_pdf_url.pdf',
+                         title='Breach of the Protection Obligation by Genki Sushi',
+                         summary="Breach of the Protection Obligation by Genki Sushi. "
+                                 "A financial penalty of $16,000 was imposed on Genki Sushi for failing "
+                                 "to put in place reasonable security arrangements to protect personal data "
+                                 "of its employees. The incident resulted in the data being subjected to "
+                                 "a ransomware attack."),
+        PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Championtutor',
+                         download_url='mock://test/get_test_pdf_url.pdf',
+                         title='Breach of the Openness Obligation by Championtutor',
+                         summary="Breach of the Openness Obligation by Championtutor. "
+                                 "Directions, including a financial penalty of $5,000, were imposed on "
+                                 "Championtutor for breaches of the PDPA. The organisation failed to "
+                                 "appoint a data protection officer and did not have written policies and "
+                                 "practices necessary to ensure its compliance with  the PDPA."),
+        PDPCDecisionItem(published_date=datetime.date(2019, 8, 2),
+                         respondent='CDP and Toppan Security Printing',
+                         download_url='mock://test/get_test_pdf_url.pdf',
+                         title='Breach of the Protection Obligation by CDP and Toppan Security Printing',
+                         summary="Breach of the Protection Obligation by CDP and Toppan Security Printing. "
+                                 "A financial penalty of $24,000 and $12,000 was imposed on CDP and "
+                                 "Toppan Security Printing respectively for failing to put in place "
+                                 "reasonable security arrangements to protect the data of CDP’s account "
+                                 "holders from unauthorised disclosure. The incident resulted in other "
+                                 "account holders’ data being printed on another account holder’s "
+                                 "notification letter. An application for reconsideration was made by "
+                                 "Toppan Security Printing. Upon reconsideration, "
+                                 "directions in the decision were varied. ")
     ]
 
 
 @pytest.fixture()
-def decisions_extras_gold(requests_mock):
-    import pdpc_decisions.scraper as scraper
+def decisions_extras_gold():
     import datetime
-    with open('tests/test_reference_1.pdf', 'rb') as html:
-        content = html.read()
-    requests_mock.get('mock://test/get_test_pdf_url_1.pdf', content=content)
-    with open('tests/test_reference_2.pdf', 'rb') as html:
-        content = html.read()
-    requests_mock.get('mock://test/get_test_pdf_url_2.pdf', content=content)
-    with open('tests/test_reference_3.pdf', 'rb') as html:
-        content = html.read()
-    requests_mock.get('mock://test/get_test_pdf_url_3.pdf', content=content)
-    with open('tests/test.pdf', 'rb') as html:
-        bytes = html.read()
-    requests_mock.get('mock://test/get_test_pdf_url.pdf', content=bytes)
     result = []
     # 0
-    item = scraper.PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Avant Logistic Service',
-                                    download_url='mock://test/get_test_pdf_url_1.pdf',
-                                    title='Breach of the Protection Obligation by Avant Logistic Service',
-                                    summary="Breach of the Protection Obligation by Avant Logistic Service. "
-                                            "Directions were issued to Avant Logistic Service for failing to "
-                                            "make reasonable security arrangements to prevent the unauthorised "
-                                            "disclosure of customers' personal data. The lapses resulted in "
-                                            "personal data of customers being disclosed by an employee.")
+    item = PDPCDecisionItem(published_date=datetime.date(2019, 8, 2),
+                            respondent='Avant Logistic Service',
+                            download_url='mock://test/get_test_pdf_url_1.pdf',
+                            title='Breach of the Protection Obligation by Avant Logistic Service',
+                            summary="Breach of the Protection Obligation by Avant Logistic Service. "
+                                    "Directions were issued to Avant Logistic Service for failing to "
+                                    "make reasonable security arrangements to prevent the unauthorised "
+                                    "disclosure of customers' personal data. The lapses resulted in "
+                                    "personal data of customers being disclosed by an employee.")
     item.case_number = 'DP-1234-5678A'
     item.citation = '[2020] SGPDPC 1'
     item.enforcement = ['directions']
@@ -177,15 +167,16 @@ def decisions_extras_gold(requests_mock):
     item.referring_to = ['[2020] SGPDPC 3', '[2019] SGPDPC 1', '[2016] SGPDPC 5']
     result.append(item)
     # 1
-    item = scraper.PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Horizon Fast Ferry',
-                                    download_url='mock://test/get_test_pdf_url_2.pdf',
-                                    title='Breach of the Protection Obligation by Horizon Fast Ferry',
-                                    summary="Breach of the Protection Obligation by Horizon Fast Ferry. "
-                                            "A financial penalty of $54,000 was imposed on Horizon Fast Ferry for "
-                                            "failing to appoint a data protection officer, develop and implement "
-                                            "data protection policies and practices, and put in place reasonable "
-                                            "security arrangements to protect the personal data collected "
-                                            "from its customers.")
+    item = PDPCDecisionItem(published_date=datetime.date(2019, 8, 2),
+                            respondent='Horizon Fast Ferry',
+                            download_url='mock://test/get_test_pdf_url_2.pdf',
+                            title='Breach of the Protection Obligation by Horizon Fast Ferry',
+                            summary="Breach of the Protection Obligation by Horizon Fast Ferry. "
+                                    "A financial penalty of $54,000 was imposed on Horizon Fast Ferry for "
+                                    "failing to appoint a data protection officer, develop and implement "
+                                    "data protection policies and practices, and put in place reasonable "
+                                    "security arrangements to protect the personal data collected "
+                                    "from its customers.")
     item.case_number = 'DP-1234-5678A'
     item.citation = '[2020] SGPDPC 3'
     item.enforcement = ['financial', 54000]
@@ -193,14 +184,14 @@ def decisions_extras_gold(requests_mock):
     item.referring_to = []
     result.append(item)
     # 2
-    item = scraper.PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Genki Sushi',
-                                    download_url='mock://test/get_test_pdf_url_3.pdf',
-                                    title='Breach of the Protection Obligation by Genki Sushi',
-                                    summary="Breach of the Protection Obligation by Genki Sushi. "
-                                            "A financial penalty of $16,000 was imposed on Genki Sushi for failing "
-                                            "to put in place reasonable security arrangements to protect personal data "
-                                            "of its employees. The incident resulted in the data being subjected to "
-                                            "a ransomware attack.")
+    item = PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Genki Sushi',
+                            download_url='mock://test/get_test_pdf_url_3.pdf',
+                            title='Breach of the Protection Obligation by Genki Sushi',
+                            summary="Breach of the Protection Obligation by Genki Sushi. "
+                                    "A financial penalty of $16,000 was imposed on Genki Sushi for failing "
+                                    "to put in place reasonable security arrangements to protect personal data "
+                                    "of its employees. The incident resulted in the data being subjected to "
+                                    "a ransomware attack.")
     item.case_number = 'DP-1234-5678A'
     item.citation = '[2018] SGPDPC 3'
     item.enforcement = [['financial', 16000]]
@@ -208,14 +199,14 @@ def decisions_extras_gold(requests_mock):
     item.referring_to = []
     result.append(item)
     # 3
-    item = scraper.PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Championtutor',
-                                    download_url='mock://test/get_test_pdf_url.pdf',
-                                    title='Breach of the Openness Obligation by Championtutor',
-                                    summary="Breach of the Openness Obligation by Championtutor. "
-                                            "Directions, including a financial penalty of $5,000, were imposed on "
-                                            "Championtutor for breaches of the PDPA. The organisation failed to "
-                                            "appoint a data protection officer and did not have written policies and "
-                                            "practices necessary to ensure its compliance with  the PDPA.")
+    item = PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='Championtutor',
+                            download_url='mock://test/get_test_pdf_url.pdf',
+                            title='Breach of the Openness Obligation by Championtutor',
+                            summary="Breach of the Openness Obligation by Championtutor. "
+                                    "Directions, including a financial penalty of $5,000, were imposed on "
+                                    "Championtutor for breaches of the PDPA. The organisation failed to "
+                                    "appoint a data protection officer and did not have written policies and "
+                                    "practices necessary to ensure its compliance with  the PDPA.")
     item.case_number = 'DP-1811-B3058'
     item.citation = '[2020] SGPDPC 1'
     item.enforcement = [['financial', 5000]]
@@ -223,19 +214,19 @@ def decisions_extras_gold(requests_mock):
     item.referring_to = []
     result.append(item)
     # 4
-    item = scraper.PDPCDecisionItem(published_date=datetime.date(2019, 8, 2),
-                                    respondent='CDP and Toppan Security Printing',
-                                    download_url='mock://test/get_test_pdf_url.pdf',
-                                    title='Breach of the Protection Obligation by CDP and Toppan Security Printing',
-                                    summary="Breach of the Protection Obligation by CDP and Toppan Security Printing. "
-                                            "A financial penalty of $24,000 and $12,000 was imposed on CDP and "
-                                            "Toppan Security Printing respectively for failing to put in place "
-                                            "reasonable security arrangements to protect the data of CDP’s account "
-                                            "holders from unauthorised disclosure. The incident resulted in other "
-                                            "account holders’ data being printed on another account holder’s "
-                                            "notification letter. An application for reconsideration was made by "
-                                            "Toppan Security Printing. Upon reconsideration, "
-                                            "directions in the decision were varied. ")
+    item = PDPCDecisionItem(published_date=datetime.date(2019, 8, 2),
+                            respondent='CDP and Toppan Security Printing',
+                            download_url='mock://test/get_test_pdf_url.pdf',
+                            title='Breach of the Protection Obligation by CDP and Toppan Security Printing',
+                            summary="Breach of the Protection Obligation by CDP and Toppan Security Printing. "
+                                    "A financial penalty of $24,000 and $12,000 was imposed on CDP and "
+                                    "Toppan Security Printing respectively for failing to put in place "
+                                    "reasonable security arrangements to protect the data of CDP’s account "
+                                    "holders from unauthorised disclosure. The incident resulted in other "
+                                    "account holders’ data being printed on another account holder’s "
+                                    "notification letter. An application for reconsideration was made by "
+                                    "Toppan Security Printing. Upon reconsideration, "
+                                    "directions in the decision were varied. ")
     item.case_number = 'DP-1811-B3058'
     item.citation = '[2020] SGPDPC 1'
     item.enforcement = [['financial', 24000], ['financial', 12000]]
@@ -243,6 +234,22 @@ def decisions_extras_gold(requests_mock):
     item.referring_to = []
     result.append(item)
     return result
+
+
+@pytest.fixture()
+def decisions_extra_mock(requests_mock):
+    with open('tests/decisions_extra_gold/test_reference_1.pdf', 'rb') as html:
+        content = html.read()
+    requests_mock.get('mock://test/get_test_pdf_url_1.pdf', content=content)
+    with open('tests/decisions_extra_gold/test_reference_2.pdf', 'rb') as html:
+        content = html.read()
+    requests_mock.get('mock://test/get_test_pdf_url_2.pdf', content=content)
+    with open('tests/decisions_extra_gold/test_reference_3.pdf', 'rb') as html:
+        content = html.read()
+    requests_mock.get('mock://test/get_test_pdf_url_3.pdf', content=content)
+    with open('tests/test.pdf', 'rb') as html:
+        bytes = html.read()
+    requests_mock.get('mock://test/get_test_pdf_url.pdf', content=bytes)
 
 
 @pytest.fixture(scope='module')
@@ -256,13 +263,13 @@ def options_test():
 
 
 @pytest.fixture(scope='module')
-def get_test_page_url():
-    return Path(os.getcwd() + '/tests/test_page.html').as_uri()
+def get_test_pdf_path():
+    return Path(os.getcwd(), 'tests', 'test.pdf')
 
 
 @pytest.fixture(scope='module')
-def get_test_pdf_path():
-    return Path(os.getcwd(), 'tests', 'test.pdf')
+def get_test_2_pdf_path():
+    return Path(os.getcwd(), 'tests', 'test_2.pdf')
 
 
 @pytest.fixture()

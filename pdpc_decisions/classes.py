@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TypedDict
+from typing import TypedDict, List
 from urllib.parse import urljoin
 
 import bs4
@@ -76,3 +76,69 @@ class PDPCDecisionItem:
 
     def __str__(self):
         return f"PDPCDecisionItem: {self.published_date} {self.respondent}"
+
+
+class Paragraph(object):
+    def __init__(self, text: str, paragraph_mark: str = ''):
+        self._text = text
+        self._paragraph_mark = paragraph_mark
+
+    @property
+    def text(self):
+        """Get the text of this paragraph."""
+        return self._text
+
+    @property
+    def paragraph_mark(self):
+        """Get the mark (paragraph number) of this paragraph, if available."""
+        return self._paragraph_mark
+
+    def __str__(self):
+        if self._paragraph_mark:
+            return f"Paragraph: {self._paragraph_mark} {self._text}"
+        else:
+            return f"Paragraph: {self._text}"
+
+
+class CorpusDocument:
+    def __init__(self, source: PDPCDecisionItem = None):
+        """
+        Base document representing a PDPC Decision.
+        :param source: (Optional) The decision which this document represents.
+        """
+        self.source = source
+        self.paragraphs: List[Paragraph] = []
+
+    def get_text_as_paragraphs(self, add_paragraph_marks: bool = False) -> List[str]:
+        """
+        Convenience method to get the text of the corpus_text as a list of string representing paragraphs.
+        :param add_paragraph_marks: Paragraphs marks (such as paragraph numbers) are added to the front
+        of the paragraph.
+        :return:
+        """
+        result = []
+        for paragraph in self.paragraphs:
+            if add_paragraph_marks:
+                result.append(f"{paragraph.paragraph_mark} {paragraph.text}")
+            else:
+                result.append(paragraph.text)
+        return result
+
+    def get_text(self, add_paragraph_marks: bool = False) -> str:
+        """
+        Convenience method to get the text of the corpus_text as string.
+        :param add_paragraph_marks: Paragraphs marks (such as paragraph numbers) are added to the front
+        of the paragraph.
+        :return:
+        """
+        return " ".join(self.get_text_as_paragraphs(add_paragraph_marks))
+
+    def __iter__(self):
+        return self.paragraphs
+
+    def __str__(self):
+        if self.source:
+            return f"CorpusDocument:{len(self.paragraphs)}, source: {self.source.respondent}, " \
+                   f"{self.source.published_date}"
+        else:
+            return f"CorpusDocument:{len(self.paragraphs)}, source: None"

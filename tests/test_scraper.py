@@ -2,7 +2,7 @@
 import pytest
 import requests
 
-import pdpc_decisions.scraper as scraper
+from pdpc_decisions.classes import PDPCDecisionItem
 
 
 def test_site_url():
@@ -22,7 +22,7 @@ def test_site_url_structure(selenium):
 def test_item_conversion(decisions_test_items):
     test, gold = decisions_test_items
     for idx, url in enumerate(test):
-        result = scraper.PDPCDecisionItem.from_web_page(url)
+        result = PDPCDecisionItem.from_web_page(url)
         assert result.published_date == gold[idx].published_date
         assert result.download_url[12:] == gold[idx].download_url[12:]
         assert result.respondent == gold[idx].respondent
@@ -39,6 +39,3 @@ def test_scraper_init():
 def test_scraper_scrape(get_test_page_url, mocker):
     pass
 
-
-def test_pdpcdecision_item_str(decisions_test_items):
-    assert str(decisions_test_items[1][0]) == "PDPCDecisionItem: 2016-04-21 Institution of Engineers, Singapore"
