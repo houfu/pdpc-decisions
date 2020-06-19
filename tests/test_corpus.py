@@ -86,11 +86,13 @@ def test_process_all(mocker):
     process_func.assert_has_calls(calls=[call('A'), call('B'), call('C')])
 
 
-def test_process_paragraph(mocker):
+def test_process_paragraph(mocker, get_test_decision_standard_pdf_path):
     add_func = mocker.patch.object(CorpusDocument, 'add_paragraph')
-    factory = common.BaseCorpusDocumentFactory()
-    factory.process_paragraph('A', 'B', 'C')
-    add_func.assert_called_with('A', 'B')
+    factory = common.BaseCorpusDocumentFactory(pdf=get_test_decision_standard_pdf_path)
+    factory.pre_process()
+    containers = list(factory.get_text_containers([1]))
+    factory.process_paragraph(containers[1], 1, containers)
+    add_func.assert_called_with(containers[1].get_text().strip(), str(1))
 
 
 def test_get_text_containers(get_test_decision_standard_pdf_path):
