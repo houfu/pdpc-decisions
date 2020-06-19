@@ -1,3 +1,5 @@
+import io
+import logging
 import re
 from dataclasses import dataclass
 from datetime import datetime
@@ -7,6 +9,8 @@ from urllib.parse import urljoin
 import bs4
 import requests
 
+logger = logging.getLogger(__name__)
+
 
 class Options(TypedDict):
     csv_path: str
@@ -15,6 +19,7 @@ class Options(TypedDict):
     action: str
     root: str
     extras: bool
+    extra_corpus: bool
 
 
 @dataclass
@@ -93,11 +98,14 @@ class Paragraph(object):
         """Get the mark (paragraph number) of this paragraph, if available."""
         return self._paragraph_mark
 
+    def update_text(self, new_text: str):
+        self._text = new_text
+
     def __str__(self):
         if self._paragraph_mark:
             return f"Paragraph: {self._paragraph_mark} {self._text}"
         else:
-            return f"Paragraph: {self._text}"
+            return f"Paragraph: NA, {self._text}"
 
 
 class CorpusDocument:
@@ -133,8 +141,11 @@ class CorpusDocument:
         """
         return " ".join(self.get_text_as_paragraphs(add_paragraph_marks))
 
+    def add_paragraph(self, text: str, mark: str = ''):
+        self.paragraphs.append(Paragraph(text, mark))
+
     def __iter__(self):
-        return self.paragraphs
+        return iter(self.paragraphs)
 
     def __str__(self):
         if self.source:
@@ -142,3 +153,38 @@ class CorpusDocument:
                    f"{self.source.published_date}"
         else:
             return f"CorpusDocument:{len(self.paragraphs)}, source: None"
+
+
+class PDFFile:
+    def __init__(self, source: PDPCDecisionItem, options: Options = None, *args, **kwargs):
+        """
+        A context manager to facilitate opening of PDF files. If a local file is found, that file is
+        returned instead of downloading from the source.
+        :param source:
+        :param options:
+        :param args:
+        :param kwargs:
+        """
+        if options and ((options['action'] == 'all') or (options['action'] == 'files')):
+            import os
+            pdf_local_file_path = os.path.join(options['download_folder'],
+                                               f"{source.published_date.strftime('%Y-%m-%d')} {source.respondent}.pdf")
+            if os.path.isfile(pdf_local_file_path):
+                logger.info('Using PDF file from local directory.')
+                self.file_handler = open(pdf_local_file_path, 'rb')
+                return
+            if os.path.isfile(
+                    os.path.join(options['download_folder'],
+                                 f"{source.published_date.strftime('%Y-%m-%d')} {source.respondent} (1).pdf")):
+                logger.warning(f'Returning a local file is not supported for secondary format. Source: {str(source)}')
+        import requests
+        r = requests.get(source.download_url)
+        logger.info('Using PDF file from source.')
+        self.file_handler = io.BytesIO(r.content)
+
+    def __enter__(self):
+        return self.file_handler
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.file_handler.close()
+        return False

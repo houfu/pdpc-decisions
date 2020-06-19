@@ -30,7 +30,7 @@ def test_paragraph():
     test = classes.Paragraph('ABCDFEF G', '1.')
     assert str(test) == 'Paragraph: 1. ABCDFEF G'
     test = classes.Paragraph('ABCDFEG')
-    assert str(test) == 'Paragraph: ABCDFEG'
+    assert str(test) == 'Paragraph: NA, ABCDFEG'
 
 
 def test_corpus_document(decisions_gold):
@@ -38,3 +38,9 @@ def test_corpus_document(decisions_gold):
     assert str(test) == "CorpusDocument:0, source: None"
     document = classes.CorpusDocument(decisions_gold[0])
     assert str(document) == "CorpusDocument:0, source: Avant Logistic Service, 2019-08-02"
+    assert iter(document)
+
+
+def test_pdffile(options_test, decisions_gold):
+    with classes.PDFFile(decisions_gold[0], options=options_test) as file:
+        assert file

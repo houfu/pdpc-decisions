@@ -88,7 +88,7 @@ def decisions_test_items(requests_mock):
 @pytest.fixture()
 def decisions_gold(requests_mock):
     import datetime
-    with open('tests/test.pdf', 'rb') as html:
+    with open('tests/test_decision_standard.pdf', 'rb') as html:
         bytes = html.read()
     requests_mock.get('mock://test/get_test_pdf_url.pdf', content=bytes)
     with open('tests/test_text_page.htm', 'r') as html:
@@ -247,7 +247,7 @@ def decisions_extra_mock(requests_mock):
     with open('tests/decisions_extra_gold/test_reference_3.pdf', 'rb') as html:
         content = html.read()
     requests_mock.get('mock://test/get_test_pdf_url_3.pdf', content=content)
-    with open('tests/test.pdf', 'rb') as html:
+    with open('tests/test_decision_standard.pdf', 'rb') as html:
         bytes = html.read()
     requests_mock.get('mock://test/get_test_pdf_url.pdf', content=bytes)
 
@@ -258,23 +258,71 @@ def options_test():
         'csv_path': 'tests/temp.csv',
         'download_folder': 'tests/downloads/',
         "corpus_folder": 'tests/corpus/',
-        'extras': True
+        'extras': True,
+        'action': 'all'
     }
 
 
 @pytest.fixture(scope='module')
-def get_test_pdf_path():
-    return Path(os.getcwd(), 'tests', 'test.pdf')
+def get_test_decision_standard_pdf_path():
+    return Path(os.getcwd(), 'tests', 'test_decision_standard.pdf')
 
 
 @pytest.fixture(scope='module')
-def get_test_2_pdf_path():
-    return Path(os.getcwd(), 'tests', 'test_2.pdf')
+def get_test_decision_v1_pdf_path():
+    return Path(os.getcwd(), 'tests', 'test_decision_v1.pdf')
+
+
+@pytest.fixture(scope='module')
+def get_test_decision_summary_pdf_path():
+    return Path(os.getcwd(), 'tests', 'test_decision_summary.pdf')
+
+
+@pytest.fixture()
+def decisions_corpus_gold(requests_mock):
+    with open('tests/test_decision_standard.pdf', 'rb') as html:
+        bytes = html.read()
+    requests_mock.get('mock://test/decision_standard.pdf', content=bytes)
+    with open('tests/test_decision_v1.pdf', 'rb') as html:
+        bytes = html.read()
+    requests_mock.get('mock://test/test_decision_v1.pdf', content=bytes)
+    with open('tests/test_decision_summary.pdf', 'rb') as html:
+        bytes = html.read()
+    requests_mock.get('mock://test/test_decision_summary.pdf', content=bytes)
+    return [
+        PDPCDecisionItem(published_date=datetime.date(2019, 8, 2),
+                         respondent='[STANDARD]',
+                         download_url='mock://test/decision_standard.pdf',
+                         title='Breach of the Protection Obligation by Avant Logistic Service',
+                         summary="Breach of the Protection Obligation by Avant Logistic Service. "
+                                 "Directions were issued to Avant Logistic Service for failing to "
+                                 "make reasonable security arrangements to prevent the unauthorised "
+                                 "disclosure of customers' personal data. The lapses resulted in "
+                                 "personal data of customers being disclosed by an employee."),
+        PDPCDecisionItem(published_date=datetime.date(2019, 8, 2),
+                         respondent='[test_decision_v1]',
+                         download_url='mock://test/test_decision_v1.pdf',
+                         title='Breach of the Protection Obligation by Horizon Fast Ferry',
+                         summary="Breach of the Protection Obligation by Horizon Fast Ferry. "
+                                 "A financial penalty of $54,000 was imposed on Horizon Fast Ferry for "
+                                 "failing to appoint a data protection officer, develop and implement "
+                                 "data protection policies and practices, and put in place reasonable "
+                                 "security arrangements to protect the personal data collected "
+                                 "from its customers."),
+        PDPCDecisionItem(published_date=datetime.date(2019, 8, 2), respondent='[SUMMARY]',
+                         download_url='mock://test/test_decision_summary.pdf',
+                         title='Breach of the Protection Obligation by Genki Sushi',
+                         summary="Breach of the Protection Obligation by Genki Sushi. "
+                                 "A financial penalty of $16,000 was imposed on Genki Sushi for failing "
+                                 "to put in place reasonable security arrangements to protect personal data "
+                                 "of its employees. The incident resulted in the data being subjected to "
+                                 "a ransomware attack.")
+    ]
 
 
 @pytest.fixture()
 def get_test_pdf_url(requests_mock):
-    with open('tests/test.pdf', 'rb') as html:
+    with open('tests/test_decision_standard.pdf', 'rb') as html:
         bytes = html.read()
     requests_mock.get('mock://test/get_test_pdf_url.pdf', content=bytes)
     return 'mock://test/get_test_pdf_url.pdf'
