@@ -102,8 +102,7 @@ Accepts the following actions.
   "`all`"       Does all the actions (scraping the website, saving a csv,
   downloading all files and creating a corpus).
 
-  "`corpus`"    After downloading all the decisions from the website, converts
-  them into text files.
+  "`corpus`"    Converts PDF format of decisions into plain text files.
 
   "`csv`"      Save the items gathered by the scraper as a csv file.
 

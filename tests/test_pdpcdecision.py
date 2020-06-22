@@ -85,3 +85,15 @@ def test_pdpc_decision_extras(mocker):
     runner.invoke(pdpc_decision, ['csv'])
     extras.assert_not_called()
     extras.reset_mock()
+
+
+def test_pdpc_decision_verbose(mocker):
+    runner = CliRunner()
+    mocker.patch.object(Scraper, 'scrape')
+    mocker.patch('pdpc_decisions.pdpcdecision.save_scrape_results_to_csv')
+    verbose = mocker.patch('pdpc_decisions.pdpcdecision.logging.basicConfig')
+    runner.invoke(pdpc_decision, ['csv', '--verbose'])
+    verbose.assert_called()
+    verbose.reset_mock()
+    runner.invoke(pdpc_decision, ['csv'])
+    verbose.assert_not_called()
