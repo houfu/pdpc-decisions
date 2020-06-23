@@ -58,7 +58,7 @@ def pdpc_decision(csv, download, corpus, action, root, extras, extra_corpus, ver
     if (action == 'all') or (action == 'corpus'):
         create_corpus(options, scrape_results)
     if extras and ((action == 'all') or (action == 'csv')):
-        scraper_extras(scrape_results)
+        scraper_extras(scrape_results, options)
     if (action == 'all') or (action == 'csv'):
         save_scrape_results_to_csv(options, scrape_results)
     diff = time.time() - start_time
