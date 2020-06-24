@@ -25,7 +25,7 @@ class SummaryDecisionFactory(BaseCorpusDocumentFactory):
 
     def pre_process(self):
         BaseCorpusDocumentFactory.pre_process(self)
-        self.text_margins = common.get_text_margins(list(self.get_text_containers()), len(self._pages))
+        self.text_margins = common.get_text_margins(list(self.get_text_containers()), 1)
         for page in range(len(self._pages)):
             page_containers = list(self.get_text_containers([page], filter_function=lambda container: round(
                 container.x0) in self.text_margins))
@@ -71,7 +71,6 @@ class SummaryDecisionFactory(BaseCorpusDocumentFactory):
             first_page = extract_pages(pdf, page_numbers=[0])
             containers = common.extract_text_containers(first_page)
             for container in containers:
-                font, is_only = common.get_common_font_from_paragraph(container)
-                if container.get_text().strip() == 'SUMMARY OF THE DECISION' and font == 'TimesNewRomanPS-BoldMT' and is_only:
+                if container.get_text().strip() == 'SUMMARY OF THE DECISION':
                     return True
         return False
