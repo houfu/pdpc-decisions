@@ -165,16 +165,17 @@ class PDFFile:
         :param args:
         :param kwargs:
         """
-        if options and ((options['action'] == 'all') or (options['action'] == 'files')):
+        if options and options['download_folder']:
             import os
-            pdf_local_file_path = os.path.join(options['download_folder'],
+            pdf_local_file_path = os.path.join(os.getcwd(), options['download_folder'],
                                                f"{source.published_date.strftime('%Y-%m-%d')} {source.respondent}.pdf")
+            logger.info(pdf_local_file_path)
             if os.path.isfile(pdf_local_file_path):
                 logger.info('Using PDF file from local directory.')
                 self.file_handler = open(pdf_local_file_path, 'rb')
                 return
             if os.path.isfile(
-                    os.path.join(options['download_folder'],
+                    os.path.join(os.getcwd(), options['download_folder'],
                                  f"{source.published_date.strftime('%Y-%m-%d')} {source.respondent} (1).pdf")):
                 logger.warning(f'Returning a local file is not supported for secondary format. Source: {str(source)}')
         import requests
