@@ -127,9 +127,9 @@ class CorpusDocument:
         result = []
         for paragraph in self.paragraphs:
             if add_paragraph_marks:
-                result.append(f"{paragraph.paragraph_mark} {paragraph.text}")
+                result.append(f"{paragraph.paragraph_mark} {paragraph.text}\n")
             else:
-                result.append(paragraph.text)
+                result.append(f"{paragraph.text}\n")
         return result
 
     def get_text(self, add_paragraph_marks: bool = False) -> str:
