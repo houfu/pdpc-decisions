@@ -64,25 +64,6 @@ def get_common_font_from_pages(pages: List[LTPage]) -> str:
     return font
 
 
-def get_common_font_from_paragraph(paragraph: layout.LTTextContainer) -> (str, bool):
-    """
-    Get the most common font in a paragraph text.
-
-    :param paragraph: The text container to evaluate.
-    :return: A tuple of type (str, bool) stating the name of the most common font, and
-             whether it is the only font in the paragraph.
-    """
-    fonts = []
-    if isinstance(paragraph, LTTextLineHorizontal):
-        fonts.extend([char.fontname for char in paragraph if isinstance(char, LTChar)])
-    else:
-        for line in paragraph:
-            fonts.extend([char.fontname for char in line if isinstance(char, layout.LTChar)])
-    c = Counter(fonts)
-    font, _ = c.most_common(1)[0]
-    return font, len(c) == 1
-
-
 def check_common_font(paragraph: layout.LTTextContainer, common_font: str) -> bool:
     """Returns true if the most common font in paragraph is common font, or if common
     font is one of the fonts used in the paragraph. """
@@ -117,11 +98,6 @@ def check_gap_before_after_container(containers: List[LTTextContainer], index: i
         return gap_after >= gap_before
     else:
         return gap_after > gap_before
-
-
-def is_on_the_same_line(paragraph_1: layout.LTTextContainer, paragraph_2: layout.LTTextContainer) -> bool:
-    """Returns true if paragraph 1 and paragraph 2 are on the same line."""
-    return paragraph_1.y1 == paragraph_2.y1 and not paragraph_1.get_text() == paragraph_2.get_text()
 
 
 def extract_text_containers(pages: Generator[layout.LTPage, None, None]) -> List[layout.LTTextContainer]:
