@@ -127,9 +127,9 @@ class CorpusDocument:
         result = []
         for paragraph in self.paragraphs:
             if add_paragraph_marks:
-                result.append(f"{paragraph.paragraph_mark} {paragraph.text}\n")
+                result.append(f"{paragraph.paragraph_mark} {paragraph.text}")
             else:
-                result.append(f"{paragraph.text}\n")
+                result.append(f"{paragraph.text}")
         return result
 
     def get_text(self, add_paragraph_marks: bool = False) -> str:
@@ -169,7 +169,6 @@ class PDFFile:
             import os
             pdf_local_file_path = os.path.join(os.getcwd(), options['download_folder'],
                                                f"{source.published_date.strftime('%Y-%m-%d')} {source.respondent}.pdf")
-            logger.info(pdf_local_file_path)
             if os.path.isfile(pdf_local_file_path):
                 logger.info('Using PDF file from local directory.')
                 self.file_handler = open(pdf_local_file_path, 'rb')
