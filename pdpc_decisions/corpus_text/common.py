@@ -6,7 +6,7 @@ from typing import List, Generator, Dict, Optional
 
 from pdfminer import layout
 from pdfminer.high_level import extract_text_to_fp, extract_pages
-from pdfminer.layout import LTTextContainer, LTChar, LTPage, LTTextLineHorizontal
+from pdfminer.layout import LTTextContainer, LTChar, LTPage, LTTextLineHorizontal, LTRect
 
 from pdpc_decisions.classes import Options, PDPCDecisionItem, CorpusDocument, PDFFile
 
@@ -18,20 +18,19 @@ def check_text_is_date(paragraph: LTTextContainer) -> bool:
     return re.match(r'\d\d? \w+ \d\d\d\d\s*$', paragraph.get_text().strip()) is not None
 
 
-def get_text_margins(text_containers: List[LTTextContainer], page_count: int) -> List[int]:
+def get_text_margins(text_containers: List[LTTextContainer], limit: int = 1) -> List[int]:
     """
     Returns a list of integers (from left to right) representing the most commonly used text
     margins in a document.
 
+    :param limit: If there are any margins with counts less than limit, it is removed.
     :param text_containers: The document to evaluate.
-    :param page_count: The number of pages of the document. It is used to filter out
-    margins which are not common (eg. page headers)
     :return: A list of rounded integers.
     """
-    containers_x0 = [container.x0 for container in text_containers]
+    containers_x0 = [round(container.x0) for container in text_containers]
     c = Counter(containers_x0)
     logger.info(f"Text margins: {c}")
-    return sorted([round(margin) for margin, count in c.most_common() if count > page_count])
+    return sorted([margin for margin, count in c.most_common() if count > limit])
 
 
 def get_main_text_size(text_containers: List[LTTextContainer]) -> int:
@@ -144,7 +143,7 @@ def split_joined_text_containers(containers: List[LTTextContainer]) -> List[LTTe
         if len(container) > 1:
             new_item = []
             for sub_container in container:
-                if isinstance(sub_container, LTTextContainer):
+                if isinstance(sub_container, LTTextContainer) and sub_container.get_text().strip() != '':
                     logger.info(f'Found split container: {sub_container}')
                     new_item.append(sub_container)
             if len(new_item) != 0:
@@ -152,6 +151,73 @@ def split_joined_text_containers(containers: List[LTTextContainer]) -> List[LTTe
                 result[index:index] = new_item
                 logger.info(f'Splitting joined container.')
     return result
+
+
+def get_footnotes_using_separator(page: LTPage, text_containers: List[LTTextContainer],
+                                  left_margin: int, main_text_size: int) \
+        -> (List[LTTextContainer], Optional[List[LTTextContainer]]):
+    if footnote_line_container := [container for container in page if all([
+        isinstance(container, LTRect),
+        container.height < 1,
+        container.y0 < 350,
+        container.width < 150,
+        round(container.x0) == left_margin
+    ])]:
+        footnote_line_container = sorted(footnote_line_container, key=lambda container: container.y0)
+        footnote_line = footnote_line_container[0].y0
+        footnotes_page = [container for container in text_containers if all([
+            container.y0 < footnote_line,
+            round(container.x0) < 284,
+            get_main_text_size([container]) < main_text_size])]
+        text_containers = [container for container in text_containers if container not in footnotes_page]
+        return text_containers, footnotes_page
+    else:
+        return text_containers, None
+
+
+def get_endnotes_using_separator(page: LTPage, text_containers: List[LTTextContainer],
+                                 left_margin: int, main_text_size: int) \
+        -> (List[LTTextContainer], Optional[List[LTTextContainer]]):
+    if endnote_line_container := [container for container in page if all([
+        isinstance(container, LTRect),
+        container.height < 1,
+        container.width < 150,
+        round(container.x0) == left_margin
+    ])]:
+        endnote_line_container = sorted(endnote_line_container, key=lambda container: container.y0)
+        endnote_line = endnote_line_container[0].y0
+        endnotes = [container for container in text_containers if all([
+            container.y0 < endnote_line,
+            get_main_text_size([container]) < main_text_size])]
+        text_containers = [container for container in text_containers if container not in endnotes]
+        return text_containers, endnotes
+    else:
+        return text_containers, None
+
+
+def construct_footnotes(footnotes: List[LTTextContainer]) -> Dict[str, str]:
+    footnote_text = []
+    result = []
+    for container in footnotes:
+        footnote_string = container.get_text().strip()
+        footnote_text.append(footnote_string)
+        if re.search(r'[.?!"”]\s*$', footnote_string):
+            if footnote_mark := re.match(r'\d+\s+', footnote_text[0].strip()):
+                footnote_mark = footnote_mark.group(0).strip()
+                footnote = ' '.join(footnote_text).replace(footnote_mark, '', 1).strip()
+                result.append((footnote_mark, footnote))
+                logger.info(f"Found a footnote: ({footnote_mark}, {footnote})")
+            else:
+                logger.warning(f'No footnote mark found: {footnote_text[0].strip()}')
+                if len(result) > 0:
+                    logger.info(f'Appending to previous footnote.')
+                    footnote_text.insert(0, result[-1][1])
+                    footnote = ' '.join(footnote_text).strip()
+                    result[-1] = (result[-1][0], footnote)
+                else:
+                    logger.error(f"Nowhere to put footnote. Abandoning: {' '.join(footnote_text)}")
+            footnote_text.clear()
+    return dict(result)
 
 
 class BaseCorpusDocumentFactory:

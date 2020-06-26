@@ -18,17 +18,14 @@ class SummaryDecisionFactory(BaseCorpusDocumentFactory):
         super().__init__(laparams=LAParams(line_margin=1, char_margin=1.5), **kwargs)
         self._custom_text_containers = []
         self._paragraph_mark_containers = []
-        self.text_margins = [72]
         self._paragraph_strings = []
         self._assigned_marks = []
         self._paragraph_mark = ''
 
     def pre_process(self):
         BaseCorpusDocumentFactory.pre_process(self)
-        self.text_margins = common.get_text_margins(list(self.get_text_containers()), 1)
         for page in range(len(self._pages)):
-            page_containers = list(self.get_text_containers([page], filter_function=lambda container: round(
-                container.x0) in self.text_margins))
+            page_containers = list(self.get_text_containers([page]))
             page_containers = sorted(page_containers, key=lambda item: item.x0)
             page_containers = sorted(page_containers, key=lambda container: container.y0, reverse=True)
             self._custom_text_containers.append(page_containers)
@@ -43,7 +40,7 @@ class SummaryDecisionFactory(BaseCorpusDocumentFactory):
         logger.info(f"New container: {container_string}")
         if match := re.match(r'^\d+\.\s*', container_string):
             self._paragraph_mark = match.group(0).strip()
-            container_string = container_string.replace(match.group(0), '', 1)
+            container_string = container_string.replace(match.group(0), '', 1).strip()
             logger.info(
                 f'Matched a paragraph mark: {self._paragraph_mark} and adjusted container string: {container_string}')
         self._paragraph_strings.append(container_string)
@@ -51,12 +48,18 @@ class SummaryDecisionFactory(BaseCorpusDocumentFactory):
         if re.search(r'[.?!]$', container_string) and (
                 len(self._paragraph_strings) == 1 or common.check_gap_before_after_container(page_containers, index)):
             if self._paragraph_mark:
-                self._result.add_paragraph(" ".join(self._paragraph_strings), self._paragraph_mark)
-                logger.info(f"Added a new paragraph: ({self._paragraph_mark}) {' '.join(self._paragraph_strings)}")
+                self._result.add_paragraph(" ".join(self._paragraph_strings).strip(), self._paragraph_mark)
+                logger.info(
+                    f"Added a new paragraph: ({self._paragraph_mark}) {' '.join(self._paragraph_strings).strip()}")
             else:
-                logger.info('No paragraph mark found. Appending to previous paragraph.')
-                self._paragraph_strings.insert(0, self._result.paragraphs[-1].text)
-                self._result.paragraphs[-1].update_text((" ".join(self._paragraph_strings)))
+                logger.info('No paragraph mark found.')
+                if len(self._result.paragraphs) > 0:
+                    logger.info('Appending to previous paragraph.')
+                    self._paragraph_strings.insert(0, self._result.paragraphs[-1].text)
+                    self._result.paragraphs[-1].update_text((" ".join(self._paragraph_strings)))
+                else:
+                    logger.info('Creating new, unmarked paragraph.')
+                    self._result.add_paragraph(" ".join(self._paragraph_strings))
             self._reset()
         logger.info('End of this container')
 
