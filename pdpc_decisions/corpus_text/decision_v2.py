@@ -3,7 +3,7 @@ import re
 from typing import List, Dict, Optional
 
 from pdfminer.high_level import extract_pages, extract_text
-from pdfminer.layout import LTTextContainer, LAParams, LTTextBoxHorizontal, LTTextLineHorizontal, LTChar, LTRect
+from pdfminer.layout import LTTextContainer, LAParams, LTTextBoxHorizontal, LTTextLineHorizontal, LTChar
 
 from pdpc_decisions.classes import PDPCDecisionItem, Options, PDFFile
 from pdpc_decisions.corpus_text import common
@@ -52,7 +52,8 @@ class DecisionV2Factory(BaseCorpusDocumentFactory):
     def pre_process(self):
         BaseCorpusDocumentFactory.pre_process(self)
         self._common_font = common.get_common_font_from_pages(self._pages)
-        self._text_margins = common.get_text_margins(list(self.get_text_containers()), len(self._pages))
+        margin_limit = 3 if len(self._pages) > 3 else len(self._pages)
+        self._text_margins = common.get_text_margins(list(self.get_text_containers()), margin_limit)
         self._main_text_size = common.get_main_text_size(list(self.get_text_containers()))
         for index, containers in enumerate(self._text_containers):
             containers = common.split_joined_text_containers(containers)
@@ -70,42 +71,14 @@ class DecisionV2Factory(BaseCorpusDocumentFactory):
     def _get_and_remove_footnotes(self):
         footnotes = []
         for index, page in enumerate(self._pages):
-            if footnote_line_container := [container for container in page if all([
-                isinstance(container, LTRect),
-                container.height < 1,
-                container.y0 < 350,
-                container.width < 150,
-                round(container.x0) == self._text_margins[0]
-            ])]:
-                footnote_line_container = sorted(footnote_line_container, key=lambda container: container.y0)
-                footnote_line = footnote_line_container[0].y0
-                footnotes_page = [container for container in self._text_containers[index] if
-                                  container.y0 < footnote_line]
-                footnotes.extend(footnotes_page)
-                self._text_containers[index] = [container for container in self._text_containers[index] if
-                                                container not in footnotes_page]
-        result = []
-        footnote_text = []
-        for index, footnote in enumerate(footnotes):
-            footnote_string = footnote.get_text().strip()
-            footnote_text.append(footnote_string)
-            if any([re.search(r'[.?!)\]]\s*$', footnote_string),
-                    check_next_footnote(footnotes, index),
-                    len(footnotes) == index + 1
-                    ]):
-                match = re.match(r'\d+\s*', footnote_text[0])
-                if match:
-                    footnote_mark = match.group(0).strip()
-                    footnote = ' '.join(footnote_text).replace(footnote_mark, '', 1).strip()
-                    result.append((footnote_mark, footnote))
-                    logger.info(f"Found a footnote: ({footnote_mark}, {footnote})")
-                else:
-                    logger.warning(f'No footnote mark found: {footnote_string}, appending to the last footnote.')
-                    footnote_text.insert(0, result[-1][1])
-                    footnote = ' '.join(footnote_text).strip()
-                    result[-1] = (result[-1][0], footnote)
-                footnote_text.clear()
-        return dict(result)
+            new_containers, footnote_page = common.get_footnotes_using_separator(page,
+                                                                                 self._text_containers[index],
+                                                                                 self._text_margins[0],
+                                                                                 self._main_text_size)
+            self._text_containers[index] = new_containers
+            if footnote_page:
+                footnotes.extend(footnote_page)
+        return common.construct_footnotes(footnotes)
 
     def process_all(self):
         for index, page_containers in enumerate(self._text_containers):
@@ -113,15 +86,7 @@ class DecisionV2Factory(BaseCorpusDocumentFactory):
 
     def process_paragraph(self, paragraph: LTTextContainer, index: int, page_containers: List[LTTextContainer]) -> None:
         logger.info(f"New container: {paragraph}")
-        if common.check_text_is_date(paragraph):
-            logger.info('Date found, skipping')
-            return
-        if any([
-            re.match(r'[A-Z ]+\s*$', paragraph.get_text()),
-            re.match(r'Tan Kiat How', paragraph.get_text()),
-            re.match(r'Yeong Zee Kin', paragraph.get_text())
-        ]):
-            logger.info('Meta-info found, skipping')
+        if self._check_skip_paragraph(paragraph, index):
             return
         container_string = self._replace_footnote(paragraph)
         container_string = self._check_top_paragraph(container_string, paragraph)
@@ -143,8 +108,8 @@ class DecisionV2Factory(BaseCorpusDocumentFactory):
             if isinstance(char, LTChar) and round(char.height) < self._main_text_size and \
                     re.match(r'\d', char.get_text()):
                 char_text.append(char.get_text())
-                if isinstance(char_list[index + 1], LTChar) and round(
-                        char_list[index + 1].height) >= self._main_text_size:
+                if (index + 1 == len(char_list)) or (isinstance(char_list[index + 1], LTChar) and round(
+                        char_list[index + 1].height) >= self._main_text_size):
                     footnote_mark = ''.join(char_text)
                     result.append(footnote_mark)
                     char_text.clear()
@@ -164,7 +129,7 @@ class DecisionV2Factory(BaseCorpusDocumentFactory):
     def _check_top_paragraph(self, container_string, paragraph):
         if all([
             round(paragraph.x0) == self._text_margins[0],
-            match := re.match(r'\d+.?\s*', paragraph.get_text()),
+            match := re.match(r'\d+\.?\s*', paragraph.get_text()),
             not self._current_paragraph_mark
         ]):
             self._current_paragraph_mark = match.group(0).strip()
@@ -181,7 +146,8 @@ class DecisionV2Factory(BaseCorpusDocumentFactory):
             self._result.add_paragraph(" ".join(self._paragraph_strings))
             logger.info(f'Added a header-like paragraph: {self._result.paragraphs[-1].text}')
             self._paragraph_strings.clear()
-        if re.search(r'[.?!]"?\d*\s*$', page_containers[index].get_text()) and any([
+            return
+        if re.search(r'[.?!][")]?\d*\s*$', page_containers[index].get_text()) and any([
             len(self._paragraph_strings) == 1,
             common.check_gap_before_after_container(page_containers, index)
         ]):
@@ -189,13 +155,46 @@ class DecisionV2Factory(BaseCorpusDocumentFactory):
                 self._result.add_paragraph(" ".join(self._paragraph_strings), self._current_paragraph_mark)
             else:
                 logger.warning(
-                    f'No paragraph mark was found for ({self._paragraph_strings[0]}). Adding to previous paragraph.')
-                self._paragraph_strings.insert(0, self._result.paragraphs[-1].text)
-                self._result.paragraphs[-1].update_text(" ".join(self._paragraph_strings))
+                    f'No paragraph mark was found for ({self._paragraph_strings[0]}).')
+                if len(self._result.paragraphs) > 0:
+                    logger.info('Adding to previous parargraph')
+                    self._paragraph_strings.insert(0, self._result.paragraphs[-1].text)
+                    self._result.paragraphs[-1].update_text(" ".join(self._paragraph_strings))
+                else:
+                    logger.warning('Creating a new paragraph')
+                    self._result.add_paragraph(" ".join(self._paragraph_strings))
             logger.info(f'Added a paragraph: {self._result.paragraphs[-1]}')
             self._paragraph_strings.clear()
             self._current_paragraph_mark = ''
             logger.info('Reset paragraph mark and string.')
+
+    def _check_skip_paragraph(self, paragraph, index):
+        paragraph_text = paragraph.get_text().strip()
+        if common.check_text_is_date(paragraph):
+            logger.info('Date found, skipping')
+            return True
+        if any([
+            re.match(r'[A-Z ]+\s*$', paragraph_text),
+            re.match(r'(\[\d{4}])\s+((?:\d\s+)?[A-Z|()]+)\s+\[?(\d+)\]?', paragraph_text),
+            re.match(r'Tan Kiat How', paragraph_text),
+            re.match(r'Yeong Zee Kin', paragraph_text)
+        ]):
+            logger.info('Meta-info found, skipping')
+            return True
+        if index == 0 and len(self._pages) > 1:
+            if paragraph_text == self._text_containers[1][0].get_text().strip():
+                logger.info('Looks like a header. Skipping.')
+                return True
+        if round(paragraph.y0) > 700 and re.match(r'(\[\d{4}])\s+((?:\d\s+)?[A-Z|()]+)\s+\[?(\d+)\]?', paragraph_text):
+            logger.info('Looks like a header. Skipping.')
+            return True
+        if 284 < round(paragraph.x0) < 296 and re.match(r'\d+$', paragraph_text):
+            logger.info('Looks like a footer. Skipping.')
+            return True
+        if re.match(r'\d+ of \d+$', paragraph_text):
+            logger.info('Looks like a footer. Skipping.')
+            return True
+        return False
 
     @classmethod
     def check_decision(cls, item: Optional[PDPCDecisionItem] = None, options: Optional[Options] = None) -> bool:
@@ -205,6 +204,7 @@ class DecisionV2Factory(BaseCorpusDocumentFactory):
             containers = common.extract_text_containers(first_page)
             if len(text.split()) <= 100:
                 for container in containers:
-                    if container.get_text().strip() == 'DECISION':
+                    container_text = container.get_text().strip()
+                    if container_text == 'DECISION' or container_text == 'GROUNDS OF DECISION':
                         return True
         return False

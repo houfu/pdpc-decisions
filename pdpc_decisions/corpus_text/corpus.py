@@ -48,7 +48,7 @@ def create_corpus_file(options: Options, item: PDPCDecisionItem) -> str:
     """
     logger.info(f'Now working on: {item}')
     logger.info(f'Source file: {item.download_url}')
-    text = get_document(options, item).get_text()
+    text = get_document(options, item).get_text_as_paragraphs()
     destination_filename = f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent}.txt"
     corpus_folder_ = options["corpus_folder"]
     destination = os.path.join(corpus_folder_, destination_filename)
@@ -72,8 +72,9 @@ def create_corpus_file(options: Options, item: PDPCDecisionItem) -> str:
         destination = os.path.join(corpus_folder_,
                                    f"{item.published_date.strftime('%Y-%m-%d')} {item.respondent} ({file_num}).txt")
     with open(destination, 'w') as fOut:
-        fOut.write(text)
-    print("Wrote: {}".format(destination))
+        text = [line + '\n' for line in text]
+        fOut.writelines(text)
+    logger.info("Wrote: {}".format(destination))
     return destination
 
 

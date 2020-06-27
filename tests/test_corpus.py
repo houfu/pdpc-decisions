@@ -37,6 +37,8 @@ def test_get_common_font_from_pages(get_test_decision_standard_pdf_path, get_tes
 
 def test_get_document(decisions_corpus_gold, options_test):
     assert corpus.get_document(options_test, decisions_corpus_gold[0])
+    options_test.update(extra_corpus=True)
+    assert corpus.get_document(options_test, decisions_corpus_gold[1])
 
 
 def test_create_corpus_file(decisions_corpus_gold, options_test):
