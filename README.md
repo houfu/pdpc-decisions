@@ -126,6 +126,9 @@ Options:
                                 (Experimental and requires reading of actual decisions)
                                 [default: *False*, '--no-extras']
   
+  `--extra-corpus/--no-extra-corpus`    Enable experimental features for corpus. 
+  This increases processing time.
+  
   `--verbose`               Verbose output
   
   `--help`                Show this message and exit.

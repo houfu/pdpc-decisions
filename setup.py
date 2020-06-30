@@ -15,7 +15,7 @@ setup(
     url='https://github.com/houfu/pdpc-decisions/',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=['pdpc_decisions'],
+    packages=['pdpc_decisions', 'pdpc_decisions.corpus_text'],
     install_requires=['Click', 'selenium', 'beautifulsoup4', 'pdfminer.six', 'html5lib',
                       'requests', 'spacy'],
     classifiers=[
