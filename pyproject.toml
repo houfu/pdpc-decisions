@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pdpc-decisions"
-version = "1.3.1"
+version = "1.3.2"
 description = "Utilities to create a corpus of decisions from the Personal Data Protection Commission of Singapore's Data Protection Enforcement Cases."
 authors = ["Ang Houfu <damon.houf@gmail.com>"]
 license = "MIT License"
