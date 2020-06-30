@@ -14,7 +14,7 @@ html5lib = "^1.0.1"
 requests = "^2.23.0"
 spacy = "^2.2.4"
 beautifulsoup4 = "^4.9.1"
-en-core-web-sm = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.5/en_core_web_sm-2.2.5.tar.gz"}
+en-core-web-sm = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.5/en_core_web_sm-2.2.5.tar.gz#egg.info=en_core_web_sm"}
 
 [tool.poetry.dev-dependencies]
 requests-mock = "^1.8.0"
